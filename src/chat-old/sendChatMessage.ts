@@ -3,7 +3,7 @@ import {
   ORRequest,
   ORResponse,
   ORToolCall,
-} from "../completion/openRouterTypes";
+} from "../qpcommon/completion/openRouterTypes";
 import { getAllTools } from "../completion/allTools";
 import { AVAILABLE_MODELS } from "./availableModels";
 

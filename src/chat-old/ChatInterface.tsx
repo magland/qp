@@ -2,7 +2,7 @@
 import { Box, CircularProgress, Stack } from "@mui/material";
 import { FunctionComponent, useEffect, useMemo, useRef, useState } from "react";
 import OpenRouterKeyDialog from "./OpenRouterKeyDialog";
-import { ORMessage, ORToolCall } from "../completion/openRouterTypes";
+import { ORMessage, ORToolCall } from "../qpcommon/completion/openRouterTypes";
 import MessageInput from "./MessageInput";
 import MessageList from "./MessageList";
 import { sendChatMessage } from "./sendChatMessage";

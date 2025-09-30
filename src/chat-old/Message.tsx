@@ -2,8 +2,8 @@
 import { Box, Paper, Typography, IconButton, Button } from "@mui/material";
 import UndoIcon from "@mui/icons-material/Undo";
 import { FunctionComponent, PropsWithChildren, useState } from "react";
-import MarkdownContent from "../components/MarkdownContent";
-import { ORMessage } from "../completion/openRouterTypes";
+import MarkdownContent from "../qpcommon/components/MarkdownContent";
+import { ORMessage } from "../qpcommon/completion/openRouterTypes";
 
 type MessageContainerProps = {
   isUser: boolean;

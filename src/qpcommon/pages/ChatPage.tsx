@@ -1,20 +1,65 @@
-import { FunctionComponent, useEffect, useRef, useState, useCallback } from "react";
+import { FunctionComponent, useEffect, useRef, useState, useCallback, useMemo } from "react";
 import useChat from "../hooks/useChat";
 import ChatInput from "../components/ChatInput";
+import UsageDisplay from "../components/UsageDisplay";
+import MarkdownContent from "../components/MarkdownContent";
+import { QPTool } from "../types";
+import { Chat } from "../interface/interface";
 
 interface ChatPageProps {
   width: number;
   height: number;
   chatId: string;
+  getTools: (chat: Chat) => Promise<QPTool[]>;
+  assistantDescription: string;
 }
 
-const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height }) => {
-  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse } = useChat(chatId);
+const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, assistantDescription }) => {
+  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error } = useChat(chatId, getTools, assistantDescription);
   const [newPrompt, setNewPrompt] = useState<string>("");
   const conversationRef = useRef<HTMLDivElement>(null);
 
   // make sure we never generate the initial response more than once
   const generatedInitialResponse = useRef(false);
+
+  // Check if chat should be disabled based on last message containing trigger phrases
+  const chatDisabledInfo = useMemo(() => {
+    if (!chat || chat.messages.length === 0) {
+      return { isDisabled: false, reason: "" };
+    }
+
+    const lastMessage = chat.messages[chat.messages.length - 1];
+    
+    // Only check assistant messages for trigger phrases
+    if (lastMessage.role !== 'assistant') {
+      return { isDisabled: false, reason: "" };
+    }
+
+    const content = lastMessage.content.toLowerCase();
+
+    if (content.includes('#irrelevant')) {
+      return {
+        isDisabled: true,
+        reason: "This chat has been disabled because the conversation became irrelevant to the intended purpose."
+      };
+    }
+
+    if (content.includes('#personal-info')) {
+      return {
+        isDisabled: true,
+        reason: "This chat has been disabled because personal information was shared that should not be made public."
+      };
+    }
+
+    if (content.includes('@manipulation')) {
+      return {
+        isDisabled: true,
+        reason: "This chat has been disabled due to suspected attempt to manipulate the assistant or break its guidelines."
+      };
+    }
+
+    return { isDisabled: false, reason: "" };
+  }, [chat]);
 
   useEffect(() => {
     if (generatedInitialResponse.current) return;
@@ -79,7 +124,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height }) =
   if (!chat) {
     return (
       <div className="chat-container">
-        <div className="error-message">Chat not found.</div>
+        <div className="error-message">{error || "Chat not found."}</div>
       </div>
     );
   }
@@ -87,14 +132,24 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height }) =
   return (
     <div style={{position: "absolute", top: 0, left: 0, width: width, height: height}}>
       <div className="chat-container">
+        <div style={{
+          padding: '6px 12px',
+          margin: '8px 20px',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '4px',
+          color: '#856404',
+          fontSize: '0.9em',
+          textAlign: 'center'
+        }}>
+          ⚠️ Warning: All chats should be considered public.
+        </div>
+        
         <div className="conversation-area" ref={conversationRef}>
           {chat.messages.map((msg, index) => (
             <div key={index} className={`message ${msg.role === 'user' ? 'message-user' : 'message-assistant'}`}>
-              <div className="message-label">
-                {msg.role === 'user' ? 'You' : 'Assistant'}
-              </div>
               <div className={`message-bubble ${msg.role === 'user' ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
-                {msg.content}
+                {msg.role === 'assistant' ? <MarkdownContent content={msg.content} /> : msg.content }
               </div>
             </div>
           ))}
@@ -104,7 +159,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height }) =
               <div className="message message-assistant">
                 <div className="message-label">Assistant</div>
                 <div className="partial-response">
-                  {partialResponse}
+                  <MarkdownContent content={partialResponse} />
                 </div>
               </div>
             ) : null
@@ -123,12 +178,44 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height }) =
           <div style={{ height: '1200px' }}></div>
         </div>
         
+        {error && (
+          <div style={{
+            padding: '12px',
+            margin: '10px 20px',
+            backgroundColor: '#fee',
+            border: '2px solid #c00',
+            borderRadius: '4px',
+            color: '#c00',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ⚠️ Error: {error}
+          </div>
+        )}
+
+        {chatDisabledInfo.isDisabled && (
+          <div style={{
+            padding: '12px',
+            margin: '10px 20px',
+            backgroundColor: '#fee',
+            border: '2px solid #c00',
+            borderRadius: '4px',
+            color: '#c00',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ⚠️ {chatDisabledInfo.reason}
+          </div>
+        )}
+        
         <ChatInput
           value={newPrompt}
           onChange={setNewPrompt}
           onSubmit={handleSubmit}
-          disabled={responding}
+          disabled={responding || chatDisabledInfo.isDisabled || !!error}
         />
+
+        <UsageDisplay model={chat.model} setModel={setChatModel} totalUsage={chat.totalUsage} />
       </div>
     </div>
   );

@@ -1,71 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
 import {
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate
+  BrowserRouter
 } from "react-router-dom";
-import ChatPage from "./pages/ChatPage";
-import NewChatPage from "./pages/NewChatPage";
-import { createNewChat } from "./interface/interface";
+import { Chat } from "./qpcommon/interface/interface";
+import MainWindow from "./qpcommon/MainWindow";
+import { QPTool } from "./qpcommon/types";
 
 function App() {
-  const [windowDimensions, setWindowDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const navigate = useNavigate();
-  const handleSubmitInitialPrompt = useCallback(
-    async (prompt: string) => {
-      const chatId = await createNewChat(prompt);
-      navigate(`/qp/chat/${chatId}`);
-    },
-    [navigate]
-  );
-
-  const location = useLocation();
-  const chatId = location.pathname.startsWith("/qp/chat/")
-    ? location.pathname.replace("/qp/chat/", "")
-    : null;
-
   return (
-    <Routes>
-      <Route path="/qp/" element={<Navigate to="/qp/chat" />} />
-      <Route
-        path="/qp/chat"
-        element={
-          <NewChatPage
-            width={windowDimensions.width}
-            height={windowDimensions.height}
-            onSubmitInitialPrompt={handleSubmitInitialPrompt}
-          />
-        }
-      />
-      <Route
-        path="/qp/chat/:chatId"
-        element={
-          <ChatPage
-            width={windowDimensions.width}
-            height={windowDimensions.height}
-            chatId={chatId || ""}
-          />
-        }
-      />
-    </Routes>
+    <BrowserRouter>
+      <MainWindow getTools={getTools} assistantDescription={assistantDescription} />
+    </BrowserRouter>
   );
 }
+
+const assistantDescription = "You are a helpful AI assistant answering questions about the solar system.";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getTools = async (_chat: Chat): Promise<QPTool[]> => {
+  // For demonstration purposes, we return an empty array of tools.
+  return Promise.resolve([]);
+};
 
 export default App;

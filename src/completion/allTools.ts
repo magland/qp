@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import * as retrieveDocs from "./tools/retrieveDocs";
 
-import { ORFunctionDescription } from "./openRouterTypes";
+import { ORFunctionDescription } from "../qpcommon/completion/openRouterTypes";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ToolExecutionContext {}

@@ -40,6 +40,19 @@ const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPromp
       <div className="new-chat-card">
         <h1 className="new-chat-title">Start a New Conversation</h1>
         
+        <div style={{
+          padding: '6px 12px',
+          margin: '10px 0',
+          backgroundColor: '#fff3cd',
+          border: '1px solid #ffc107',
+          borderRadius: '4px',
+          color: '#856404',
+          fontSize: '0.9em',
+          textAlign: 'center'
+        }}>
+          ⚠️ Warning: All chats should be considered public.
+        </div>
+        
         <div className="prompt-input-container">
           <textarea
             ref={textareaRef}

@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { FunctionComponent, useEffect, useRef } from "react";
 import Message from "./Message";
 import ToolApprovalMessage from "./ToolApprovalMessage";
-import { ORMessage, ORToolCall } from "../completion/openRouterTypes";
+import { ORMessage, ORToolCall } from "../qpcommon/completion/openRouterTypes";
 
 type MessageListProps = {
   messages: ORMessage[];

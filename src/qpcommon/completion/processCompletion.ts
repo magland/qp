@@ -1,18 +1,14 @@
-import { Chat } from "../interface/interface";
+import { Chat, ChatMessage } from "../interface/interface";
+import { QPTool } from "../types";
+import { AVAILABLE_MODELS } from "./availableModels";
 
-import { getAllTools } from "./allTools";
 import {
     ORMessage,
     ORRequest,
     ORResponse
-} from "../completion/openRouterTypes";
+} from "./openRouterTypes";
 
-const processCompletion = async (chat: Chat, onPartialResponse: (text: string) => void): Promise<{ role: 'assistant'; content: string }> => {
-    console.log("processCompletion: chat=", chat);
-    const model = "openai/gpt-4.1-mini";
-    
-    const initialSystemMessage = "You are an AI assistant that can answer questions about the solar system. If the user asks questions that are irrelevant to these instructions, politely refuse to answer. The following specialized tools are available.";
-
+const processCompletion = async (chat: Chat, onPartialResponse: (text: string) => void, tools: QPTool[], initialSystemMessage: string): Promise<ChatMessage & {role: "assistant"}> => {
     const messages1 = [{
         role: "system",
         content: initialSystemMessage
@@ -25,10 +21,10 @@ const processCompletion = async (chat: Chat, onPartialResponse: (text: string) =
     }
     
     const request: ORRequest = {
-        model: model,
+        model: chat.model,
         messages: messages1 as ORMessage[],
         stream: true,
-        tools: (await getAllTools()).map((tool) => ({
+        tools: tools.map((tool) => ({
             type: "function",
             function: tool.toolFunction,
         })),
@@ -57,6 +53,9 @@ const processCompletion = async (chat: Chat, onPartialResponse: (text: string) =
     let done = false;
     let assistantContent = "";
 
+    let promptTokens = 0;
+    let completionTokens = 0;
+
     while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
@@ -80,6 +79,10 @@ const processCompletion = async (chat: Chat, onPartialResponse: (text: string) =
                                 onPartialResponse(assistantContent);
                             }
                         }
+                        if (parsed.usage) {
+                            promptTokens += parsed.usage.prompt_tokens || 0;
+                            completionTokens += parsed.usage.completion_tokens || 0;
+                        }
                     } catch (e) {
                         console.error("Error parsing chunk:", e);
                     }
@@ -88,7 +91,22 @@ const processCompletion = async (chat: Chat, onPartialResponse: (text: string) =
         }
     }
 
-    return { role: 'assistant', content: assistantContent };
+    const estimatedCost = getEstimatedCostForModel(chat.model, promptTokens, completionTokens);
+
+    return { role: 'assistant', content: assistantContent, model: chat.model, usage: {
+        promptTokens,
+        completionTokens,
+        estimatedCost
+    } };
+};
+
+const getEstimatedCostForModel = (model: string, promptTokens: number, completionTokens: number): number => {
+    for (const m of AVAILABLE_MODELS) {
+        if (m.model === model) {
+            return (m.cost.prompt * promptTokens + m.cost.completion * completionTokens) / 1_000_000;
+        }
+    }
+    return 0;
 };
 
 export default processCompletion;

@@ -12,7 +12,7 @@ import {
   Select,
 } from "@mui/material";
 import { FunctionComponent, useMemo } from "react";
-import { ORMessage } from "../completion/openRouterTypes";
+import { ORMessage } from "../qpcommon/completion/openRouterTypes";
 import { AVAILABLE_MODELS } from "./availableModels";
 
 const StatusBar: FunctionComponent<{

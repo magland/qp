@@ -1,6 +1,6 @@
 import { Box, Button, Paper, Typography } from "@mui/material";
 import { FunctionComponent } from "react";
-import { ORToolCall } from "../completion/openRouterTypes";
+import { ORToolCall } from "../qpcommon/completion/openRouterTypes";
 
 type ToolApprovalMessageContainerProps = {
   children: React.ReactNode;
