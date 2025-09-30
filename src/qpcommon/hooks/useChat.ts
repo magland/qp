@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import processCompletion from "../completion/processCompletion";
-import { Chat, chatReducer, emptyChat, getChat, saveChat } from "../interface/interface";
-import { QPTool } from "../types";
+import { chatReducer, emptyChat, getChat, saveChat } from "../interface/interface";
+import { Chat } from "../types";
+import { QPTool } from "../QPTool";
 
 const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, assistantDescription: string) => {
   const [chat, chatDispatch] = useReducer(chatReducer, emptyChat);
@@ -38,6 +39,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, as
       const initialSystemMessage = await getInitialSystemMessage(assistantDescription, chat, tools);
       const newAssistantMessage = await processCompletion(chat, setPartialResponse, tools, initialSystemMessage);
       chatDispatch({ type: "add_message", message: newAssistantMessage });
+      chatDispatch({ type: "increment_usage", usage: newAssistantMessage.usage });
       setPartialResponse("");
       setResponding(false);
     } catch (err) {

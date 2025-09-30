@@ -1,51 +1,6 @@
-const STORAGE_KEY = 'qp_chat_database';
+import { Chat, ChatMessage } from "../types";
 
-// Load from localStorage on initialization
-const loadFromStorage = (): { [key: string]: Chat } => {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        return stored ? JSON.parse(stored) : {};
-    } catch (error) {
-        console.error('Failed to load chat database from localStorage:', error);
-        return {};
-    }
-};
-
-// Save to localStorage
-const saveToStorage = (database: { [key: string]: Chat }): void => {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(database));
-    } catch (error) {
-        console.error('Failed to save chat database to localStorage:', error);
-    }
-};
-
-const simulatedChatDatabase: { [key: string]: Chat } = loadFromStorage();
-
-export type ChatMessage = {
-    role: 'user'
-    content: string;
-} | {
-    role: 'assistant'
-    content: string;
-    model: string;
-    usage: {
-        promptTokens: number;
-        completionTokens: number;
-        estimatedCost: number;
-    }
-}
-
-export type Chat = {
-    chatId: string;
-    messages: ChatMessage[];
-    totalUsage: {
-        promptTokens: number;
-        completionTokens: number;
-        estimatedCost: number;
-    }
-    model: string;
-};
+const API_BASE_URL = "https://qp-api-two.vercel.app/api";
 
 export type ChatAction = {
     type: "add_message";
@@ -105,27 +60,96 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
 };
 
 export const createNewChat = async (initialPrompt: string): Promise<string> => {
-    const chatId = `chat_${Date.now()}`;
-    simulatedChatDatabase[chatId] = {
-        chatId,
-        messages: [{ role: 'user', content: initialPrompt }],
-        totalUsage: { promptTokens: 0, completionTokens: 0, estimatedCost: 0 },
-        model: "openai/gpt-4.1-mini"
-    };
-    saveToStorage(simulatedChatDatabase);
-    return chatId;
+    const response = await fetch(`${API_BASE_URL}/chats`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ initialPrompt }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to create chat');
+    }
+
+    const data = await response.json();
+    return data.chatId;
 };
 
 export const getChat = async (chatId: string): Promise<Chat | null> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            const chat = simulatedChatDatabase[chatId];
-            resolve(chat ? { ...chat } : null);
-        }, 500);
-    });
+    try {
+        const response = await fetch(`${API_BASE_URL}/chats/${chatId}`);
+
+        if (response.status === 404) {
+            return null;
+        }
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch chat');
+        }
+
+        const chat = await response.json();
+        
+        // Convert date strings back to Date objects if needed
+        if (chat.createdAt) {
+            chat.createdAt = new Date(chat.createdAt);
+        }
+        if (chat.updatedAt) {
+            chat.updatedAt = new Date(chat.updatedAt);
+        }
+
+        return chat;
+    } catch (error) {
+        console.error('Error fetching chat:', error);
+        throw error;
+    }
 };
 
 export const saveChat = async (chat: Chat): Promise<void> => {
-    simulatedChatDatabase[chat.chatId] = chat;
-    saveToStorage(simulatedChatDatabase);
+    const response = await fetch(`${API_BASE_URL}/chats/${chat.chatId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(chat),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to save chat');
+    }
+};
+
+export const listChats = async (): Promise<Chat[]> => {
+    const response = await fetch(`${API_BASE_URL}/chats`);
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to list chats');
+    }
+
+    const chats = await response.json();
+    
+    // Convert date strings back to Date objects if needed
+    return chats.map((chat: Chat) => ({
+        ...chat,
+        createdAt: chat.createdAt ? new Date(chat.createdAt) : undefined,
+        updatedAt: chat.updatedAt ? new Date(chat.updatedAt) : undefined,
+    }));
+};
+
+export const deleteChat = async (chatId: string, adminKey: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/chats/${chatId}`, {
+        method: 'DELETE',
+        headers: {
+            'x-admin-key': adminKey,
+        },
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete chat');
+    }
 };

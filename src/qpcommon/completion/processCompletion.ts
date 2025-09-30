@@ -1,34 +1,31 @@
-import { Chat, ChatMessage } from "../interface/interface";
-import { QPTool } from "../types";
+import { QPTool } from "../QPTool";
+import { Chat, ChatMessage, CompletionRequest } from "../types";
 import { AVAILABLE_MODELS } from "./availableModels";
 
 import {
-    ORMessage,
-    ORRequest,
     ORResponse
 } from "./openRouterTypes";
 
 const processCompletion = async (chat: Chat, onPartialResponse: (text: string) => void, tools: QPTool[], initialSystemMessage: string): Promise<ChatMessage & {role: "assistant"}> => {
-    const messages1 = [{
-        role: "system",
-        content: initialSystemMessage
-    }];
-    for (const msg of chat.messages) {
-        messages1.push({
-            role: msg.role,
-            content: msg.content
-        });
-    }
-    
-    const request: ORRequest = {
+    const request: CompletionRequest = {
         model: chat.model,
-        messages: messages1 as ORMessage[],
-        stream: true,
+        systemMessage: initialSystemMessage,
+        messages: chat.messages,
         tools: tools.map((tool) => ({
             type: "function",
             function: tool.toolFunction,
         })),
     };
+    
+    // const request: ORRequest = {
+    //     model: chat.model,
+    //     messages: messages1 as ORMessage[],
+    //     stream: true,
+    //     tools: tools.map((tool) => ({
+    //         type: "function",
+    //         function: tool.toolFunction,
+    //     })),
+    // };
 
     const response = await fetch(
         "https://qp-api-two.vercel.app/api/completion",
@@ -92,6 +89,8 @@ const processCompletion = async (chat: Chat, onPartialResponse: (text: string) =
     }
 
     const estimatedCost = getEstimatedCostForModel(chat.model, promptTokens, completionTokens);
+
+    console.log('--- test', promptTokens, completionTokens, estimatedCost);
 
     return { role: 'assistant', content: assistantContent, model: chat.model, usage: {
         promptTokens,

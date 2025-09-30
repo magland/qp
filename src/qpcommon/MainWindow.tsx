@@ -6,10 +6,12 @@ import {
     useLocation,
     useNavigate
 } from "react-router-dom";
-import { Chat, createNewChat } from "./interface/interface";
+import { createNewChat } from "./interface/interface";
 import ChatPage from "./pages/ChatPage";
 import NewChatPage from "./pages/NewChatPage";
-import { QPTool } from "./types";
+import ChatsListPage from "./pages/ChatsListPage";
+import { Chat } from "./types";
+import { QPTool } from "./QPTool";
 
 type MainWindowProps = {
   getTools: (chat: Chat) => Promise<QPTool[]>;
@@ -50,6 +52,15 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, assistantDes
   return (
     <Routes>
       <Route path="/qp/" element={<Navigate to="/qp/chat" />} />
+      <Route
+        path="/qp/chats"
+        element={
+          <ChatsListPage
+            width={windowDimensions.width}
+            height={windowDimensions.height}
+          />
+        }
+      />
       <Route
         path="/qp/chat"
         element={

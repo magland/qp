@@ -1,10 +1,11 @@
 import { FunctionComponent, useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import useChat from "../hooks/useChat";
 import ChatInput from "../components/ChatInput";
 import UsageDisplay from "../components/UsageDisplay";
 import MarkdownContent from "../components/MarkdownContent";
-import { QPTool } from "../types";
-import { Chat } from "../interface/interface";
+import { Chat } from "../types";
+import { QPTool } from "../QPTool";
 
 interface ChatPageProps {
   width: number;
@@ -15,6 +16,7 @@ interface ChatPageProps {
 }
 
 const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, assistantDescription }) => {
+  const navigate = useNavigate();
   const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error } = useChat(chatId, getTools, assistantDescription);
   const [newPrompt, setNewPrompt] = useState<string>("");
   const conversationRef = useRef<HTMLDivElement>(null);
@@ -113,6 +115,10 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
     setNewPrompt("");
   }, [newPrompt, submitUserMessage, responding]);
 
+  const handleNewChat = useCallback(() => {
+    navigate("/qp/chat");
+  }, [navigate]);
+
   if (!chat && loadingChat) {
     return (
       <div className="chat-container">
@@ -133,16 +139,36 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
     <div style={{position: "absolute", top: 0, left: 0, width: width, height: height}}>
       <div className="chat-container">
         <div style={{
-          padding: '6px 12px',
-          margin: '8px 20px',
-          backgroundColor: '#fff3cd',
-          border: '1px solid #ffc107',
-          borderRadius: '4px',
-          color: '#856404',
-          fontSize: '0.9em',
-          textAlign: 'center'
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '12px',
+          margin: '8px 20px'
         }}>
-          ⚠️ Warning: All chats should be considered public.
+          <div style={{
+            flex: 1,
+            padding: '6px 12px',
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffc107',
+            borderRadius: '4px',
+            color: '#856404',
+            fontSize: '0.9em',
+            textAlign: 'center'
+          }}>
+            ⚠️ Warning: All chats should be considered public.
+          </div>
+          <button 
+            onClick={handleNewChat} 
+            className="new-chat-button"
+            style={{
+              padding: '0.4rem 1rem',
+              fontSize: '0.875rem',
+              borderRadius: '6px',
+              flexShrink: 0
+            }}
+          >
+            + New Chat
+          </button>
         </div>
         
         <div className="conversation-area" ref={conversationRef}>

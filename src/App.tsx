@@ -1,9 +1,9 @@
 import {
   BrowserRouter
 } from "react-router-dom";
-import { Chat } from "./qpcommon/interface/interface";
 import MainWindow from "./qpcommon/MainWindow";
-import { QPTool } from "./qpcommon/types";
+import { Chat } from "./qpcommon/types";
+import { QPTool } from "./qpcommon/QPTool";
 
 function App() {
   return (

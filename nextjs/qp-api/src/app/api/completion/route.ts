@@ -1,3 +1,4 @@
+import { CompletionRequest } from "../../../types";
 import { NextResponse } from "next/server";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -16,7 +17,7 @@ const phrasesToCheck = [
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: CompletionRequest = await request.json();
     const userKey = request.headers.get("x-openrouter-key");
     const isCheapModel = cheapModels.includes(body.model);
 
@@ -37,17 +38,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const systemMessage = body.systemMessage;
     const messages = body.messages;
-    const firstMessage = messages[0];
-    if (firstMessage.role !== "system") {
-      return NextResponse.json(
-        { error: "First message must be a system message" },
-        { status: 400 }
-      );
-    }
-    const firstMessageContent = firstMessage.content;
     for (const phrase of phrasesToCheck) {
-      if (!firstMessageContent.includes(phrase)) {
+      if (!systemMessage.includes(phrase)) {
         return NextResponse.json(
           { error: "First message must contain the correct system message" },
           { status: 400 }
@@ -55,8 +49,15 @@ export async function POST(request: Request) {
       }
     }
 
-    // Check if streaming is requested
-    const isStreaming = body.stream === true;
+    const body2 = {
+      model: body.model,
+      messages: [
+        { role: "system", content: systemMessage },
+        ...messages
+      ],
+      stream: true,
+      tools: body.tools,
+    }
 
     const response = await fetch(OPENROUTER_API_URL, {
       method: "POST",
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body2),
     });
 
     if (!response.ok) {
@@ -75,44 +76,38 @@ export async function POST(request: Request) {
     }
 
     // Handle streaming response
-    if (isStreaming && response.body) {
-      const encoder = new TextEncoder();
-      const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
-      const stream = new ReadableStream({
-        async start(controller) {
-          const reader = response.body!.getReader();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body!.getReader();
 
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
 
-              if (done) {
-                controller.close();
-                break;
-              }
-
-              // Decode the chunk and forward it
-              const chunk = decoder.decode(value, { stream: true });
-              controller.enqueue(encoder.encode(chunk));
+            if (done) {
+              controller.close();
+              break;
             }
-          } catch (error) {
-            controller.error(error);
+
+            // Decode the chunk and forward it
+            const chunk = decoder.decode(value, { stream: true });
+            controller.enqueue(encoder.encode(chunk));
           }
-        },
-      });
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
 
-      return new Response(stream, {
-        headers: {
-          "Content-Type": "text/plain; charset=utf-8",
-          "Transfer-Encoding": "chunked",
-        },
-      });
-    }
-
-    // Handle non-streaming response (existing behavior)
-    const result = await response.json();
-    return NextResponse.json(result);
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
