@@ -4,20 +4,21 @@ import useChat from "../hooks/useChat";
 import ChatInput from "../components/ChatInput";
 import UsageDisplay from "../components/UsageDisplay";
 import MarkdownContent from "../components/MarkdownContent";
-import { Chat } from "../types";
-import { QPTool } from "../QPTool";
+import { Chat, ChatMessage } from "../types";
+import { QPTool } from "../types";
+import { Preferences } from "../MainWindow";
 
 interface ChatPageProps {
   width: number;
   height: number;
   chatId: string;
   getTools: (chat: Chat) => Promise<QPTool[]>;
-  assistantDescription: string;
+  preferences: Preferences
 }
 
-const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, assistantDescription }) => {
+const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, preferences }) => {
   const navigate = useNavigate();
-  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error } = useChat(chatId, getTools, assistantDescription);
+  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat } = useChat(chatId, getTools, preferences);
   const [newPrompt, setNewPrompt] = useState<string>("");
   const conversationRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +38,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
       return { isDisabled: false, reason: "" };
     }
 
-    const content = lastMessage.content.toLowerCase();
+    const content = (lastMessage.content || "").toLowerCase();
 
     if (content.includes('#irrelevant')) {
       return {
@@ -116,8 +117,20 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
   }, [newPrompt, submitUserMessage, responding]);
 
   const handleNewChat = useCallback(() => {
-    navigate("/qp/chat");
+    navigate("/chat");
   }, [navigate]);
+
+  const allMessagesIncludingPartialResponse = useMemo(() => {
+    if (!chat) return [];
+    if (responding && partialResponse) {
+      return [...chat.messages.map(m => ({ message: m, inProgress: false })), ...partialResponse.map(m => ({ message: m, inProgress: true }))];
+    }
+    return chat.messages.map(m => ({ message: m, inProgress: false }));
+  }, [chat, responding, partialResponse]);
+
+  const allToolMessages = useMemo(() => {
+    return allMessagesIncludingPartialResponse.filter(m => m.message.role === 'tool').map(m => m.message);
+  }, [allMessagesIncludingPartialResponse]);
 
   if (!chat && loadingChat) {
     return (
@@ -155,7 +168,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
             fontSize: '0.9em',
             textAlign: 'center'
           }}>
-            ⚠️ Warning: All chats should be considered public.
+            ⚠️ Warning: All chats are public.
           </div>
           <button 
             onClick={handleNewChat} 
@@ -172,24 +185,9 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
         </div>
         
         <div className="conversation-area" ref={conversationRef}>
-          {chat.messages.map((msg, index) => (
-            <div key={index} className={`message ${msg.role === 'user' ? 'message-user' : 'message-assistant'}`}>
-              <div className={`message-bubble ${msg.role === 'user' ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
-                {msg.role === 'assistant' ? <MarkdownContent content={msg.content} /> : msg.content }
-              </div>
-            </div>
+          {allMessagesIncludingPartialResponse.map((xx, index) => (
+            <MessageItem key={index} message={xx.message} allToolMessages={allToolMessages} tools={toolsForChat} inProgress={xx.inProgress} />
           ))}
-          
-          {responding && partialResponse && (
-            chat.messages.length > 0 && chat.messages[chat.messages.length - 1].role !== 'assistant' ? (
-              <div className="message message-assistant">
-                <div className="message-label">Assistant</div>
-                <div className="partial-response">
-                  <MarkdownContent content={partialResponse} />
-                </div>
-              </div>
-            ) : null
-          )}
           
           {responding && !partialResponse && (
             <div className="message message-assistant">
@@ -246,5 +244,53 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
     </div>
   );
 };
+
+const MessageItem: FunctionComponent<{ message: ChatMessage, allToolMessages: ChatMessage[], tools: QPTool[], inProgress: boolean }> = ({ message, allToolMessages, tools, inProgress }) => {
+  if (message.role === 'user') {
+    return <div className="message message-user">
+      <div className="message-bubble message-bubble-user">
+        {message.content}
+      </div>
+    </div>;
+  } else if (message.role === 'assistant') {
+    return <div className="message message-assistant">
+      {message.content && <div className="message-bubble message-bubble-assistant">
+        <MarkdownContent content={message.content || ""} doRehypeRaw={!inProgress} />
+      </div>}
+      {
+        message.tool_calls && message.tool_calls.length > 0 && (
+          <div className="tool-calls-container">
+            {message.tool_calls.map((toolCall, index) => {
+              const correspondingToolMessage = allToolMessages.find(m => m.role === "tool" && m.tool_call_id === toolCall.id);
+              if (correspondingToolMessage && correspondingToolMessage.role !== "tool") {
+                throw new Error("Mismatched tool message role");
+              }
+              const correspondingTool = tools.find(t => t.toolFunction.name === toolCall.function.name);
+              if (correspondingTool && correspondingTool.createToolCallView) {
+                return <span key={index}>
+                {correspondingTool.createToolCallView(toolCall, correspondingToolMessage)}
+                </span>;
+              }
+              // other wise we just show "Calling [tool name]..." or "Called [tool name]"
+              if (correspondingToolMessage) {
+                return (<div key={index} className="tool-call-message">
+                  <strong>Called {toolCall.function.name}</strong>                  
+                </div>
+                );
+              } else {
+                return (<div key={index} className="tool-call-message">
+                  <strong>Calling {toolCall.function.name}...</strong>                  
+                </div>
+                );
+              }
+            })}
+          </div>
+        )
+      }
+    </div>;
+  } else {
+    return null;
+  }
+}
 
 export default ChatPage;

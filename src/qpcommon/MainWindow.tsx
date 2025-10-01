@@ -11,14 +11,21 @@ import ChatPage from "./pages/ChatPage";
 import NewChatPage from "./pages/NewChatPage";
 import ChatsListPage from "./pages/ChatsListPage";
 import { Chat } from "./types";
-import { QPTool } from "./QPTool";
+import { QPTool } from "./types";
+import getAppName from "./getAppName";
 
 type MainWindowProps = {
   getTools: (chat: Chat) => Promise<QPTool[]>;
-  assistantDescription: string;
+  preferences: Preferences;
 };
 
-const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, assistantDescription }) => {
+export type Preferences = {
+  assistantDescription: string;
+  newChatTitle: string;
+  newChatPromptPlaceholderText: string;
+};
+
+const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences }) => {
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -38,22 +45,22 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, assistantDes
   const navigate = useNavigate();
   const handleSubmitInitialPrompt = useCallback(
     async (prompt: string) => {
-      const chatId = await createNewChat(prompt);
-      navigate(`/qp/chat/${chatId}`);
+      const chatId = await createNewChat(prompt, getAppName());
+      navigate(`/chat/${chatId}`);
     },
     [navigate]
   );
 
   const location = useLocation();
-  const chatId = location.pathname.startsWith("/qp/chat/")
-    ? location.pathname.replace("/qp/chat/", "")
+  const chatId = location.pathname.startsWith("/chat/")
+    ? location.pathname.replace("/chat/", "")
     : null;
 
   return (
     <Routes>
-      <Route path="/qp/" element={<Navigate to="/qp/chat" />} />
+      <Route path="/" element={<Navigate to="/chat" />} />
       <Route
-        path="/qp/chats"
+        path="/chats"
         element={
           <ChatsListPage
             width={windowDimensions.width}
@@ -62,27 +69,29 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, assistantDes
         }
       />
       <Route
-        path="/qp/chat"
+        path="/chat"
         element={
           <NewChatPage
             width={windowDimensions.width}
             height={windowDimensions.height}
             onSubmitInitialPrompt={handleSubmitInitialPrompt}
+            preferences={preferences}
           />
         }
       />
       <Route
-        path="/qp/chat/:chatId"
+        path="/chat/:chatId"
         element={
           <ChatPage
             width={windowDimensions.width}
             height={windowDimensions.height}
             chatId={chatId || ""}
             getTools={getTools}
-            assistantDescription={assistantDescription}
+            preferences={preferences}
           />
         }
       />
+      <Route path="*" element={<Navigate to="/chat" />} />
     </Routes>
   );
 }

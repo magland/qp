@@ -258,7 +258,7 @@ button[type="button"] {
 
 /* Chat Interface Styles */
 .chat-container {
-  max-width: 800px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 0;
   height: 100vh;
@@ -373,7 +373,7 @@ button[type="button"] {
 }
 
 .message-bubble {
-  max-width: 70%;
+  max-width: 100%;
   padding: 1rem 1.25rem;
   border-radius: 18px;
 }

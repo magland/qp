@@ -1,19 +1,37 @@
-import { FunctionComponent, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { FunctionComponent, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
+import remarkMath from "remark-math";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vs as highlightStyle } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface MarkdownContentProps {
   content: string;
+  doRehypeRaw?: boolean;
 }
 
 const MarkdownContent: FunctionComponent<MarkdownContentProps> = ({
   content,
+  doRehypeRaw,
 }) => {
+  const rehypePlugins = useMemo(() => {
+    const plugins: any[] = [rehypeKatex];
+    if (doRehypeRaw) {
+      plugins.push(rehypeRaw);
+    }
+    return plugins;
+  }, [doRehypeRaw]);
+  const remarkPlugins = useMemo(() => {
+    const plugins: any[] = [remarkGfm, remarkMath];
+    return plugins;
+  }, []);
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
       components={{
         a({ children, ...props }) {
           return (

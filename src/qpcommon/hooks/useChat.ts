@@ -1,15 +1,34 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import processCompletion from "../completion/processCompletion";
 import { chatReducer, emptyChat, getChat, saveChat } from "../interface/interface";
-import { Chat } from "../types";
-import { QPTool } from "../QPTool";
+import { Chat, ChatMessage } from "../types";
+import { QPTool } from "../types";
+import { Preferences } from "../MainWindow";
 
-const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, assistantDescription: string) => {
+const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, preferences: Preferences) => {
   const [chat, chatDispatch] = useReducer(chatReducer, emptyChat);
   const [loadingChat, setLoadingChat] = useState<boolean>(true);
   const [responding, setResponding] = useState<boolean>(false);
-  const [partialResponse, setPartialResponse] = useState<string>("");
+  const [partialResponse, setPartialResponse] = useState<ChatMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [toolsForChat, setToolsForChat] = useState<QPTool[]>([]);
+
+  useEffect(() => {
+    let canceled = false;
+    getTools(chat).then((tools) => {
+      if (!canceled) {
+        setToolsForChat(tools);
+      }
+    }).catch((err) => {
+      console.error("Error getting tools for chat:", err);
+      if (!canceled) {
+        setToolsForChat([]);
+      }
+    });
+    return () => {
+      canceled = true;
+    };
+  }, [chat, getTools]);
 
   const loadChat = useCallback(async () => {
     setLoadingChat(true);
@@ -32,27 +51,31 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, as
 
   const generateResponse = useCallback(async (chat: Chat) => {
     setResponding(true);
-    setPartialResponse("");
+    setPartialResponse(null);
     setError(null);
     try {
-      const tools = await getTools(chat);
-      const initialSystemMessage = await getInitialSystemMessage(assistantDescription, chat, tools);
-      const newAssistantMessage = await processCompletion(chat, setPartialResponse, tools, initialSystemMessage);
-      chatDispatch({ type: "add_message", message: newAssistantMessage });
-      chatDispatch({ type: "increment_usage", usage: newAssistantMessage.usage });
-      setPartialResponse("");
+      const tools = toolsForChat;
+      const initialSystemMessage = await getInitialSystemMessage(preferences.assistantDescription, chat, tools);
+      const newMessages = await processCompletion(chat, setPartialResponse, tools, initialSystemMessage);
+      for (const newMessage of newMessages) {
+        chatDispatch({ type: "add_message", message: newMessage });
+        if (newMessage.role === "assistant") {
+          chatDispatch({ type: "increment_usage", usage: newMessage.usage });
+        }
+      }
+      setPartialResponse(null);
       setResponding(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error generating response");
-      setPartialResponse("");
+      setPartialResponse(null);
       setResponding(false);
     }
-  }, [chatDispatch, getTools, assistantDescription]);
+  }, [chatDispatch, preferences, toolsForChat]);
 
   useEffect(() => {
     const lastMessageIsAssistant = chat.messages.length > 0 && chat.messages[chat.messages.length - 1].role === 'assistant';
     if (lastMessageIsAssistant) {
-      const assistantMessageHasRedFlag = checkForRedFlags(chat.messages[chat.messages.length - 1].content);
+      const assistantMessageHasRedFlag = checkForRedFlags(chat.messages[chat.messages.length - 1].content || "");
       if (!assistantMessageHasRedFlag) {
         // save chat only if no red flags
         saveChat(chat).catch((err) => {
@@ -94,7 +117,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, as
     chatDispatch({ type: "set_model", model: newModel });
   }, []);
 
-  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error };
+  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat };
 }
 
 const getInitialSystemMessage = async (assistantDescription: string, _chat: Chat, tools: QPTool[]): Promise<string> => {

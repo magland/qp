@@ -1,3 +1,4 @@
+import getAppName from "../getAppName";
 import { Chat, ChatMessage } from "../types";
 
 const API_BASE_URL = "https://qp-api-two.vercel.app/api";
@@ -20,7 +21,8 @@ export type ChatAction = {
     chat: Chat;
 }
 
-export const emptyChat = {
+export const emptyChat: Chat = {
+    app: getAppName(),
     chatId: "",
     messages: [],
     totalUsage: {
@@ -59,13 +61,13 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
     }
 };
 
-export const createNewChat = async (initialPrompt: string): Promise<string> => {
+export const createNewChat = async (initialPrompt: string, app: string): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/chats`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ initialPrompt }),
+        body: JSON.stringify({ initialPrompt, app }),
     });
 
     if (!response.ok) {
@@ -122,8 +124,8 @@ export const saveChat = async (chat: Chat): Promise<void> => {
     }
 };
 
-export const listChats = async (): Promise<Chat[]> => {
-    const response = await fetch(`${API_BASE_URL}/chats`);
+export const listChats = async (app: string): Promise<Chat[]> => {
+    const response = await fetch(`${API_BASE_URL}/chats?app=${encodeURIComponent(app)}`);
 
     if (!response.ok) {
         const error = await response.json();

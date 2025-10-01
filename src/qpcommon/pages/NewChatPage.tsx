@@ -1,12 +1,14 @@
 import { FunctionComponent, useCallback, useState, useEffect, useRef } from "react";
+import { Preferences } from "../MainWindow";
 
 interface NewChatPageProps {
   width: number;
   height: number;
   onSubmitInitialPrompt: (prompt: string) => void;
+  preferences: Preferences
 }
 
-const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPrompt }) => {
+const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPrompt, preferences }) => {
   const [prompt, setPrompt] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -19,7 +21,7 @@ const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPromp
   }, [prompt, onSubmitInitialPrompt, isSubmitting]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === 'Enter' && (!e.ctrlKey && !e.metaKey)) {
       e.preventDefault();
       onSubmit();
     }
@@ -38,7 +40,7 @@ const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPromp
   return (
     <div className="new-chat-container">
       <div className="new-chat-card">
-        <h1 className="new-chat-title">Start a New Conversation</h1>
+        <h1 className="new-chat-title">{preferences.newChatTitle || "New Chat"}</h1>
         
         <div style={{
           padding: '6px 12px',
@@ -50,7 +52,7 @@ const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPromp
           fontSize: '0.9em',
           textAlign: 'center'
         }}>
-          ⚠️ Warning: All chats should be considered public.
+          ⚠️ Warning: All chats are public.
         </div>
         
         <div className="prompt-input-container">
@@ -59,7 +61,7 @@ const NewChatPage: FunctionComponent<NewChatPageProps> = ({ onSubmitInitialPromp
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="What would you like to talk about? (Ctrl+Enter to submit)"
+            placeholder={preferences.newChatPromptPlaceholderText || "Enter your prompt here..."}
             className="prompt-textarea"
             disabled={isSubmitting}
             autoFocus

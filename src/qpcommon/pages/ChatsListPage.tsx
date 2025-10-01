@@ -2,6 +2,7 @@ import { FunctionComponent, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Chat } from "../types";
 import { listChats, deleteChat } from "../interface/interface";
+import getAppName from "../getAppName";
 
 interface ChatsListPageProps {
   width: number;
@@ -21,7 +22,7 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
     try {
       setLoading(true);
       setError("");
-      const fetchedChats = await listChats();
+      const fetchedChats = await listChats(getAppName());
       setChats(fetchedChats);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load chats");
@@ -71,11 +72,11 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
   }, [deletingChatId, adminKey, loadChats]);
 
   const handleChatClick = useCallback((chatId: string) => {
-    navigate(`/qp/chat/${chatId}`);
+    navigate(`/chat/${chatId}`);
   }, [navigate]);
 
   const handleNewChat = useCallback(() => {
-    navigate("/qp/chat");
+    navigate("/chat");
   }, [navigate]);
 
   const formatDate = (date?: Date) => {
@@ -136,6 +137,8 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
                   <span>${chat.totalUsage.estimatedCost.toFixed(4)}</span>
                   <span>•</span>
                   <span>{chat.model}</span>
+                  <span>•</span>
+                  <span>{chat.app}</span>
                 </div>
               </div>
               <button

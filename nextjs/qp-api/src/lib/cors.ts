@@ -5,8 +5,15 @@ export const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:5173',
   'http://localhost:5174',
-  'https://magland.github.io'
 ];
+
+for (const appName of ['stan-assistant', 'nwb-assistant']) {
+  allowedOrigins.push(`https://${appName}.vercel.app`);
+  allowedOrigins.push(`http://${appName}.localhost:3000`);
+  allowedOrigins.push(`http://${appName}.localhost:3001`);
+  allowedOrigins.push(`http://${appName}.localhost:5173`);
+  allowedOrigins.push(`http://${appName}.localhost:5174`);
+}
 
 export const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
