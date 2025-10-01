@@ -4,9 +4,12 @@ import useChat from "../hooks/useChat";
 import ChatInput from "../components/ChatInput";
 import UsageDisplay from "../components/UsageDisplay";
 import MarkdownContent from "../components/MarkdownContent";
+import SettingsDialog from "../components/SettingsDialog";
 import { Chat, ChatMessage } from "../types";
 import { QPTool } from "../types";
 import { Preferences } from "../MainWindow";
+import { CHEAP_MODELS } from "../completion/cheapModels";
+import { getStoredApiKey } from "../utils/apiKeyStorage";
 
 interface ChatPageProps {
   width: number;
@@ -20,10 +23,22 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
   const navigate = useNavigate();
   const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat } = useChat(chatId, getTools, preferences);
   const [newPrompt, setNewPrompt] = useState<string>("");
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const conversationRef = useRef<HTMLDivElement>(null);
 
   // make sure we never generate the initial response more than once
   const generatedInitialResponse = useRef(false);
+
+  // Check if the current model requires an API key
+  const requiresApiKey = useMemo(() => {
+    if (!chat) return false;
+    return !CHEAP_MODELS.includes(chat.model);
+  }, [chat]);
+
+  // Check if user has provided an API key
+  const hasApiKey = useMemo(() => {
+    return !!getStoredApiKey();
+  }, [isSettingsOpen]); // Re-check when settings dialog closes
 
   // Check if chat should be disabled based on last message containing trigger phrases
   const chatDisabledInfo = useMemo(() => {
@@ -170,18 +185,33 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
           }}>
             ⚠️ Warning: All chats are public.
           </div>
-          <button 
-            onClick={handleNewChat} 
-            className="new-chat-button"
-            style={{
-              padding: '0.4rem 1rem',
-              fontSize: '0.875rem',
-              borderRadius: '6px',
-              flexShrink: 0
-            }}
-          >
-            + New Chat
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="new-chat-button"
+              style={{
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.875rem',
+                borderRadius: '6px',
+                flexShrink: 0
+              }}
+              title="Settings"
+            >
+              ⚙️
+            </button>
+            <button 
+              onClick={handleNewChat} 
+              className="new-chat-button"
+              style={{
+                padding: '0.4rem 1rem',
+                fontSize: '0.875rem',
+                borderRadius: '6px',
+                flexShrink: 0
+              }}
+            >
+              + New Chat
+            </button>
+          </div>
         </div>
         
         <div className="conversation-area" ref={conversationRef}>
@@ -231,16 +261,36 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
             ⚠️ {chatDisabledInfo.reason}
           </div>
         )}
+
+        {requiresApiKey && !hasApiKey && !chatDisabledInfo.isDisabled && !error && (
+          <div style={{
+            padding: '12px',
+            margin: '10px 20px',
+            backgroundColor: '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: '4px',
+            color: '#856404',
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
+            ⚠️ This model requires an OpenRouter API key. Click the ⚙️ settings button to add your key or select a free model.
+          </div>
+        )}
         
         <ChatInput
           value={newPrompt}
           onChange={setNewPrompt}
           onSubmit={handleSubmit}
-          disabled={responding || chatDisabledInfo.isDisabled || !!error}
+          disabled={responding || chatDisabledInfo.isDisabled || !!error || (requiresApiKey && !hasApiKey)}
         />
 
         <UsageDisplay model={chat.model} setModel={setChatModel} totalUsage={chat.totalUsage} />
       </div>
+      
+      <SettingsDialog
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </div>
   );
 };

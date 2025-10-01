@@ -7,13 +7,15 @@ export const allowedOrigins = [
   'http://localhost:5174',
 ];
 
-for (const appName of ['stan-assistant', 'nwb-assistant']) {
+for (const appName of ['stan-assistant', 'nwb-assistant', 'neurosift-chat']) {
   allowedOrigins.push(`https://${appName}.vercel.app`);
   allowedOrigins.push(`http://${appName}.localhost:3000`);
   allowedOrigins.push(`http://${appName}.localhost:3001`);
   allowedOrigins.push(`http://${appName}.localhost:5173`);
   allowedOrigins.push(`http://${appName}.localhost:5174`);
 }
+
+allowedOrigins.push("https://chat.neurosift.app");
 
 export const corsHeaders = {
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',

@@ -29,6 +29,9 @@ export async function POST(request: Request) {
     else if (app === 'nwb-assistant') {
       prefix = 'nwb_';
     }
+    else if (app === 'neurosift-chat') {
+      prefix = 'ns_';
+    }
     const chatId = `${prefix}${Date.now()}`;
     const now = new Date();
 

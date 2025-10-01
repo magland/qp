@@ -5,6 +5,7 @@ import stanAssistantDescription from "./assistantDescriptions/stanAssistantDescr
 import { useMemo } from "react";
 import getAppName from "./qpcommon/getAppName";
 import nwbAssistantDescription from "./assistantDescriptions/nwbAssistantDescription";
+import neurosiftChatAssistantDescription from "./assistantDescriptions/neurosiftChatDescription";
 
 function App() {
   const preferences = useMemo(() => {
@@ -21,6 +22,13 @@ function App() {
         assistantDescription: nwbAssistantDescription,
         newChatTitle: "Ask about NWB.",
         newChatPromptPlaceholderText: "Enter prompt here. This assistant has access to the NWB documentation.",
+      };
+    }
+    else if (appName === "neurosift-chat") {
+      return {
+        assistantDescription: neurosiftChatAssistantDescription,
+        newChatTitle: "Query DANDI, OpenNeuro, and EBRAINS.",
+        newChatPromptPlaceholderText: "Enter prompt here...",
       };
     }
     else {

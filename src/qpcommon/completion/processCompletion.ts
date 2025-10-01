@@ -2,6 +2,7 @@
 import { QPTool } from "../types";
 import { Chat, ChatMessage, CompletionRequest } from "../types";
 import { AVAILABLE_MODELS } from "./availableModels";
+import { getStoredApiKey } from "../utils/apiKeyStorage";
 
 import { ORResponse, ORToolCall } from "./openRouterTypes";
 
@@ -31,11 +32,18 @@ const processCompletion = async (
   //     })),
   // };
 
+  const apiKey = getStoredApiKey();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  
+  if (apiKey) {
+    headers["x-openrouter-key"] = apiKey;
+  }
+
   const response = await fetch("https://qp-api-two.vercel.app/api/completion", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(request),
   });
 
