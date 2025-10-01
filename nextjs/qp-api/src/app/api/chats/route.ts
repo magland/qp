@@ -2,45 +2,44 @@ import { NextResponse } from "next/server";
 import { getDatabase } from "../../../lib/mongodb";
 import { Chat } from "../../../types";
 
-// POST /api/chats - Create a new chat
+// POST /api/chats - Create a new chat with complete content
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { initialPrompt, app } = body;
+    const chat: Chat = body;
 
-    if (!initialPrompt || typeof initialPrompt !== 'string') {
-      return NextResponse.json(
-        { error: "initialPrompt is required and must be a string" },
-        { status: 400 }
-      );
-    }
-
-    if (!app || typeof app !== 'string') {
+    if (!chat.app || typeof chat.app !== 'string') {
       return NextResponse.json(
         { error: "app is required and must be a string" },
         { status: 400 }
       );
     }
 
+    if (!Array.isArray(chat.messages)) {
+      return NextResponse.json(
+        { error: "messages must be an array" },
+        { status: 400 }
+      );
+    }
+
+    // Generate chatId based on app
     let prefix = 'chat_';
-    if (app === 'stan-assistant') {
+    if (chat.app === 'stan-assistant') {
       prefix = 'st_';
     }
-    else if (app === 'nwb-assistant') {
+    else if (chat.app === 'nwb-assistant') {
       prefix = 'nwb_';
     }
-    else if (app === 'neurosift-chat') {
+    else if (chat.app === 'neurosift-chat') {
       prefix = 'ns_';
     }
     const chatId = `${prefix}${Date.now()}`;
     const now = new Date();
 
+    // Create the complete chat object with generated fields
     const newChat: Chat = {
-      app,
+      ...chat,
       chatId,
-      messages: [{ role: 'user', content: initialPrompt }],
-      totalUsage: { promptTokens: 0, completionTokens: 0, estimatedCost: 0 },
-      model: "openai/gpt-4.1-mini",
       createdAt: now,
       updatedAt: now
     };

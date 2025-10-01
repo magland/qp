@@ -1,18 +1,14 @@
-import { FunctionComponent, useCallback, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import {
     Navigate,
     Route,
     Routes,
-    useLocation,
-    useNavigate
+    useLocation
 } from "react-router-dom";
-import { createNewChat } from "./interface/interface";
 import ChatPage from "./pages/ChatPage";
-import NewChatPage from "./pages/NewChatPage";
 import ChatsListPage from "./pages/ChatsListPage";
 import { Chat } from "./types";
 import { QPTool } from "./types";
-import getAppName from "./getAppName";
 
 type MainWindowProps = {
   getTools: (chat: Chat) => Promise<QPTool[]>;
@@ -22,7 +18,6 @@ type MainWindowProps = {
 export type Preferences = {
   assistantDescription: string;
   newChatTitle: string;
-  newChatPromptPlaceholderText: string;
 };
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences }) => {
@@ -42,18 +37,11 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const navigate = useNavigate();
-  const handleSubmitInitialPrompt = useCallback(
-    async (prompt: string) => {
-      const chatId = await createNewChat(prompt, getAppName());
-      navigate(`/chat/${chatId}`);
-    },
-    [navigate]
-  );
-
   const location = useLocation();
   const chatId = location.pathname.startsWith("/chat/")
     ? location.pathname.replace("/chat/", "")
+    : location.pathname === "/chat"
+    ? ""
     : null;
 
   return (
@@ -71,10 +59,12 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences 
       <Route
         path="/chat"
         element={
-          <NewChatPage
+          <ChatPage
+            key="new-chat" // Force remount when switching to new chat
             width={windowDimensions.width}
             height={windowDimensions.height}
-            onSubmitInitialPrompt={handleSubmitInitialPrompt}
+            chatId=""
+            getTools={getTools}
             preferences={preferences}
           />
         }
@@ -83,6 +73,7 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences 
         path="/chat/:chatId"
         element={
           <ChatPage
+            key={chatId} // Force remount when switching chats
             width={windowDimensions.width}
             height={windowDimensions.height}
             chatId={chatId || ""}

@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import processCompletion from "../completion/processCompletion";
-import { chatReducer, emptyChat, getChat, saveChat } from "../interface/interface";
+import { chatReducer, emptyChat, getChat, saveChat, createChatWithContent } from "../interface/interface";
 import { Chat, ChatMessage } from "../types";
 import { QPTool } from "../types";
 import { Preferences } from "../MainWindow";
 
 const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, preferences: Preferences) => {
+  const isNewChatMode = !chatId || chatId === "";
   const [chat, chatDispatch] = useReducer(chatReducer, emptyChat);
-  const [loadingChat, setLoadingChat] = useState<boolean>(true);
+  const [loadingChat, setLoadingChat] = useState<boolean>(!isNewChatMode);
   const [responding, setResponding] = useState<boolean>(false);
   const [partialResponse, setPartialResponse] = useState<ChatMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [toolsForChat, setToolsForChat] = useState<QPTool[]>([]);
+  const [newChatId, setNewChatId] = useState<string | null>(null);
 
   useEffect(() => {
     let canceled = false;
@@ -31,6 +33,13 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
   }, [chat, getTools]);
 
   const loadChat = useCallback(async () => {
+    if (isNewChatMode) {
+      // In new chat mode, don't load from DB - just use empty chat
+      chatDispatch({ type: "set_chat", chat: emptyChat });
+      setLoadingChat(false);
+      return;
+    }
+    
     setLoadingChat(true);
     setError(null);
     try {
@@ -47,7 +56,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
       setError(err instanceof Error ? err.message : "Error loading chat");
       setLoadingChat(false);
     }
-  }, [chatId]);
+  }, [chatId, isNewChatMode]);
 
   const generateResponse = useCallback(async (chat: Chat) => {
     setResponding(true);
@@ -77,26 +86,45 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
     if (lastMessageIsAssistant) {
       const assistantMessageHasRedFlag = checkForRedFlags(chat.messages[chat.messages.length - 1].content || "");
       if (!assistantMessageHasRedFlag) {
-        // save chat only if no red flags
-        saveChat(chat).catch((err) => {
-          console.error("Error saving chat:", err);
-        });
+        // In new chat mode, create the chat in DB for the first time
+        if (isNewChatMode && !newChatId) {
+          createChatWithContent(chat).then((id) => {
+            setNewChatId(id);
+          }).catch((err) => {
+            console.error("Error creating chat:", err);
+            setError(err instanceof Error ? err.message : "Error creating chat");
+          });
+        } else if (!isNewChatMode) {
+          // For existing chats, just save updates
+          saveChat(chat).catch((err) => {
+            console.error("Error saving chat:", err);
+          });
+        }
       }
     }
-  }, [chat]);
+  }, [chat, isNewChatMode, newChatId]);
 
   const submitUserMessage = useCallback(async (content: string) => {
     try {
       const userMessage = { role: 'user' as const, content };
       chatDispatch({ type: "add_message", message: userMessage });
-      await generateResponse({
+      
+      const updatedChat = {
         ...chat,
         messages: [...chat.messages, userMessage]
-      });
+      };
+      
+      await generateResponse(updatedChat);
+      
+      // If in new chat mode and response was successful, save to DB
+      if (isNewChatMode && !error) {
+        // Wait a bit to ensure response has been added to chat state
+        // The chat will be saved automatically by the useEffect watching for assistant messages
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error submitting message");
     }
-  }, [chat, chatDispatch, generateResponse]);
+  }, [chat, chatDispatch, generateResponse, isNewChatMode, error]);
 
   const generateInitialResponse = useCallback(async () => {
     try {
@@ -117,7 +145,15 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
     chatDispatch({ type: "set_model", model: newModel });
   }, []);
 
-  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat };
+  const clearChat = useCallback(() => {
+    chatDispatch({ type: "set_chat", chat: emptyChat });
+    setError(null);
+    setPartialResponse(null);
+    setResponding(false);
+    setNewChatId(null);
+  }, []);
+
+  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat };
 }
 
 const getInitialSystemMessage = async (assistantDescription: string, _chat: Chat, tools: QPTool[]): Promise<string> => {

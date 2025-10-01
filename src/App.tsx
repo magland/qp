@@ -13,29 +13,25 @@ function App() {
     if (appName === "stan-assistant") {
       return {
         assistantDescription: stanAssistantDescription,
-        newChatTitle: "Ask about Stan.",
-        newChatPromptPlaceholderText: "Enter prompt here. This assistant has access to the Stan User's Guide.",
+        newChatTitle: "Ask about Stan."
       };
     }
     else if (appName === "nwb-assistant") {
       return {
         assistantDescription: nwbAssistantDescription,
-        newChatTitle: "Ask about NWB.",
-        newChatPromptPlaceholderText: "Enter prompt here. This assistant has access to the NWB documentation.",
+        newChatTitle: "Ask about NWB."
       };
     }
     else if (appName === "neurosift-chat") {
       return {
         assistantDescription: neurosiftChatAssistantDescription,
         newChatTitle: "Query DANDI, OpenNeuro, and EBRAINS.",
-        newChatPromptPlaceholderText: "Enter prompt here...",
       };
     }
     else {
       return {
         assistantDescription: "Unknown assistant",
         newChatTitle: "Unknown assistant",
-        newChatPromptPlaceholderText: "Unknown assistant",
       };
     }
   }, []);

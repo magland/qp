@@ -21,13 +21,20 @@ interface ChatPageProps {
 
 const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, preferences }) => {
   const navigate = useNavigate();
-  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat } = useChat(chatId, getTools, preferences);
+  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat } = useChat(chatId, getTools, preferences);
   const [newPrompt, setNewPrompt] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const conversationRef = useRef<HTMLDivElement>(null);
 
   // make sure we never generate the initial response more than once
   const generatedInitialResponse = useRef(false);
+
+  // Navigate to the new chat once it's created
+  useEffect(() => {
+    if (newChatId) {
+      navigate(`/chat/${newChatId}`);
+    }
+  }, [newChatId, navigate]);
 
   // Check if the current model requires an API key
   const requiresApiKey = useMemo(() => {
@@ -38,6 +45,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
   // Check if user has provided an API key
   const hasApiKey = useMemo(() => {
     return !!getStoredApiKey();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSettingsOpen]); // Re-check when settings dialog closes
 
   // Check if chat should be disabled based on last message containing trigger phrases
@@ -132,8 +140,13 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
   }, [newPrompt, submitUserMessage, responding]);
 
   const handleNewChat = useCallback(() => {
-    navigate("/chat");
-  }, [navigate]);
+    if (chatId) {
+      navigate("/chat", { replace: true });
+    }
+    else {
+      clearChat();
+    }
+  }, [navigate, chatId]);
 
   const allMessagesIncludingPartialResponse = useMemo(() => {
     if (!chat) return [];
@@ -202,11 +215,14 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
             <button 
               onClick={handleNewChat} 
               className="new-chat-button"
+              disabled={isNewChatMode && chat.messages.length === 0}
               style={{
                 padding: '0.4rem 1rem',
                 fontSize: '0.875rem',
                 borderRadius: '6px',
-                flexShrink: 0
+                flexShrink: 0,
+                opacity: (isNewChatMode && chat.messages.length === 0) ? 0.5 : 1,
+                cursor: (isNewChatMode && chat.messages.length === 0) ? 'not-allowed' : 'pointer'
               }}
             >
               + New Chat
@@ -215,21 +231,44 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
         </div>
         
         <div className="conversation-area" ref={conversationRef}>
-          {allMessagesIncludingPartialResponse.map((xx, index) => (
-            <MessageItem key={index} message={xx.message} allToolMessages={allToolMessages} tools={toolsForChat} inProgress={xx.inProgress} />
-          ))}
-          
-          {responding && !partialResponse && (
-            <div className="message message-assistant">
-              <div className="message-label">Assistant</div>
-              <div className="partial-response">
-                Thinking...
-              </div>
+          {isNewChatMode && chat.messages.length === 0 ? (
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              padding: '40px 20px',
+              textAlign: 'center'
+            }}>
+              <h1 style={{
+                fontSize: '2rem',
+                fontWeight: '600',
+                marginBottom: '1rem',
+                color: '#333'
+              }}>
+                {preferences.newChatTitle || "New Chat"}
+              </h1>
             </div>
-          )}
+          ) : (
+            <>
+              {allMessagesIncludingPartialResponse.map((xx, index) => (
+                <MessageItem key={index} message={xx.message} allToolMessages={allToolMessages} tools={toolsForChat} inProgress={xx.inProgress} />
+              ))}
+              
+              {responding && !partialResponse && (
+                <div className="message message-assistant">
+                  <div className="message-label">Assistant</div>
+                  <div className="partial-response">
+                    Thinking...
+                  </div>
+                </div>
+              )}
 
-          {/* Put empty space at the bottom so last message can scroll to top of visible area */}
-          <div style={{ height: '1200px' }}></div>
+              {/* Put empty space at the bottom so last message can scroll to top of visible area */}
+              <div style={{ height: '1200px' }}></div>
+            </>
+          )}
         </div>
         
         {error && (

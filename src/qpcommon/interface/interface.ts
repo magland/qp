@@ -61,13 +61,13 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
     }
 };
 
-export const createNewChat = async (initialPrompt: string, app: string): Promise<string> => {
+export const createChatWithContent = async (chat: Chat): Promise<string> => {
     const response = await fetch(`${API_BASE_URL}/chats`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ initialPrompt, app }),
+        body: JSON.stringify(chat),
     });
 
     if (!response.ok) {
