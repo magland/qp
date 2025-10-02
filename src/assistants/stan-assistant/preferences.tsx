@@ -39,7 +39,7 @@ const AssistantDisplayInfo = () => {
 const preferences: Preferences = {
   assistantSystemPrompt: stanAssistantSystemPrompt,
   assistantDisplayInfo: <AssistantDisplayInfo />,
-  suggestedPrompts: [],
+  suggestedPrompts: ["Give an overview of Stan's modeling language.", "Provide an example Stan model for linear regression.", "Provide an interactive example using Stan Playground."],
 };
 
 export default preferences;

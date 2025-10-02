@@ -573,7 +573,7 @@ export const createToolCallView = (
         retrieved {urls.map((url) => {
           const parts = url.split("/");
           const fileName = parts[parts.length - 1];
-          return <span key={url}><a href={url} target="_blank" rel="noreferrer">{fileName}</a></span>;
+          return <span key={url}><a href={url} target="_blank" rel="noreferrer">{fileName}</a>&nbsp;</span>;
         })}
       </div>
     );
