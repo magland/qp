@@ -21,7 +21,11 @@ export type ChatMessage = {
         promptTokens: number;
         completionTokens: number;
         estimatedCost: number;
-    }
+    };
+    feedback?: {
+      thumbs?: "up" | "down";
+      comment?: string;
+    };
 } | {
   role: "tool";
   content: string;

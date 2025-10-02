@@ -153,7 +153,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
     setNewChatId(null);
   }, []);
 
-  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat };
+  return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat, chatDispatch };
 }
 
 const getInitialSystemMessage = async (assistantSystemPrompt: string, _chat: Chat, tools: QPTool[]): Promise<string> => {

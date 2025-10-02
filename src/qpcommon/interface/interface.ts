@@ -19,6 +19,13 @@ export type ChatAction = {
 } | {
     type: "set_chat";
     chat: Chat;
+} | {
+    type: "update_message_feedback";
+    messageIndex: number;
+    feedback: {
+        thumbs?: "up" | "down";
+        comment?: string;
+    };
 }
 
 export const emptyChat: Chat = {
@@ -56,6 +63,19 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
             };
         case "set_chat":
             return action.chat;
+        case "update_message_feedback":
+            return {
+                ...state,
+                messages: state.messages.map((msg, index) => {
+                    if (index === action.messageIndex && msg.role === "assistant") {
+                        return {
+                            ...msg,
+                            feedback: action.feedback
+                        };
+                    }
+                    return msg;
+                })
+            };
         default:
             return state;
     }
