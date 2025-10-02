@@ -8,6 +8,8 @@ const AssistantDisplayInfo = () => {
   const stanUrl = "https://mc-stan.org/";
   const stanUsersGuideUrl =
     "https://mc-stan.org/docs/stan-users-guide/index.html";
+  const stanReferenceManualUrl =
+    "https://mc-stan.org/docs/reference-manual/";
   const docPages = useMemo(() => getDocPages(), []);
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto" }}>
@@ -17,6 +19,7 @@ const AssistantDisplayInfo = () => {
           <a href={stanUsersGuideUrl} target="_blank" rel="noopener noreferrer">
             Stan User's Guide
           </a>
+          and a condensed version of the <a href={stanReferenceManualUrl} target="_blank" rel="noopener noreferrer">Stan Reference Manual</a>.
       </p>
       <p>
         {docPages.map((doc, index) => (
