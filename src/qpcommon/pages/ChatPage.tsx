@@ -234,10 +234,10 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
               <div style={{
                 padding: '12px',
                 margin: '10px 20px',
-                backgroundColor: '#e8f5e9',
-                border: '2px solid #81c784',
                 borderRadius: '4px',
-                color: '#2e7d32'
+                backgroundColor: '#f5f5f5',
+                border: '1px solid #ddd',
+                color: '#333',
               }}>
                 <div style={{
                   fontWeight: 'bold',
@@ -277,7 +277,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
                       cursor: 'pointer',
                       fontSize: '1rem',
                       padding: '0 4px',
-                      color: '#2e7d32'
+                      color: '#777',
                     }}
                     title={showPublicInfo ? "Hide info" : "Show info"}
                   >
@@ -288,12 +288,13 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
                   <div style={{
                     marginTop: '12px',
                     padding: '10px',
-                    backgroundColor: '#f1f8f4',
-                    borderRadius: '4px',
                     fontSize: '0.85rem',
                     lineHeight: '1.5',
-                    color: '#1b5e20',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px',
+                    color: '#555',
                   }}>
                     <strong>Why make chats public?</strong>
                     <p style={{ margin: '8px 0 0 0' }}>
