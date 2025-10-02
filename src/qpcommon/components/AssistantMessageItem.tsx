@@ -53,7 +53,6 @@ const AssistantMessageItem: FunctionComponent<{
 
   return (
     <div className="message message-assistant">
-      <div className="message-label">Assistant</div>
       {message.content && (
         <div className="message-bubble message-bubble-assistant">
           <MarkdownContent
@@ -64,7 +63,7 @@ const AssistantMessageItem: FunctionComponent<{
       )}
 
       {/* Feedback UI - only show when not in progress */}
-      {!inProgress && (
+      {!inProgress && !message.tool_calls && (
         <div style={{ marginTop: "8px", marginLeft: "12px", width: "100%" }}>
           {/* Thumbs buttons */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>

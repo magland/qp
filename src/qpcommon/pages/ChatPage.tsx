@@ -459,7 +459,6 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
 
               {responding && !partialResponse && (
                 <div className="message message-assistant">
-                  <div className="message-label">Assistant</div>
                   <div className="partial-response">Thinking...</div>
                 </div>
               )}

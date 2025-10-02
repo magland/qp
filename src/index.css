@@ -390,13 +390,6 @@ button[type="button"] {
   border-bottom-left-radius: 6px;
 }
 
-.message-label {
-  font-size: 0.75rem;
-  color: #666;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-}
-
 .partial-response {
   background: #f8f9fa;
   border: 1px solid var(--border-color);
