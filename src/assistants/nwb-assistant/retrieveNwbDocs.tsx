@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ORToolCall } from "../qpcommon/completion/openRouterTypes";
-import { ChatMessage, QPFunctionDescription } from "../qpcommon/types";
+import { ORToolCall } from "../../qpcommon/completion/openRouterTypes";
+import { ChatMessage, QPFunctionDescription } from "../../qpcommon/types";
 
 export const toolFunction: QPFunctionDescription = {
   name: "retrieve_docs",

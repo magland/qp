@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { ORToolCall } from "../../qpcommon/completion/openRouterTypes";
-import { ChatMessage, QPFunctionDescription } from "../../qpcommon/types";
+import { ORToolCall } from "../../../qpcommon/completion/openRouterTypes";
+import { ChatMessage, QPFunctionDescription } from "../../../qpcommon/types";
 import { JobRunnerClient } from "./jobRunnerClient";
-import MarkdownContent from "../../qpcommon/components/MarkdownContent";
+import MarkdownContent from "../../../qpcommon/components/MarkdownContent";
 
 export const toolFunction: QPFunctionDescription = {
   name: "execute_javascript",

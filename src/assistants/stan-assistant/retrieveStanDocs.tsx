@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ORToolCall } from "../qpcommon/completion/openRouterTypes";
-import { ChatMessage, QPFunctionDescription } from "../qpcommon/types";
+import { ORToolCall } from "../../qpcommon/completion/openRouterTypes";
+import { ChatMessage, QPFunctionDescription } from "../../qpcommon/types";
 
 export const toolFunction: QPFunctionDescription = {
   name: "retrieve_docs",
@@ -36,7 +36,7 @@ export type DocPage = {
 
 // let cachedDocPages: DocPage[] | null = null;
 
-export const fetchDocPages = async (): Promise<DocPage[]> => {
+export const getDocPages = (): DocPage[] => {
   return [
     {
       title: "Main Page",
@@ -479,14 +479,14 @@ export const execute = async (
 };
 
 const getSourceUrl = async (url: string): Promise<string> => {
-  const docPages = await fetchDocPages();
+  const docPages = getDocPages();
   const doc = docPages.find((d) => d.url === url);
   if (!doc) throw new Error(`Unsupported URL: ${url}`);
   return doc.sourceUrl;
 };
 
 export const getDetailedDescription = async () => {
-  const docPages = await fetchDocPages();
+  const docPages = getDocPages();
 
   const preloadedContent: { [url: string]: string } = {};
   for (const doc of docPages) {

@@ -1,9 +1,9 @@
 import getAppName from "../qpcommon/getAppName";
 import { QPTool } from "../qpcommon/types";
 import { Chat } from "../qpcommon/types";
-import * as retrieveStanDocs from "./retrieveStanDocs";
-import * as retrieveNwbDocs from "./retrieveNwbDocs";
-import * as executeJavaScript from "./neurosiftChat/executeJavaScript";
+import * as retrieveStanDocs from "../assistants/stan-assistant/retrieveStanDocs";
+import * as retrieveNwbDocs from "../assistants/nwb-assistant/retrieveNwbDocs";
+import * as executeJavaScript from "../assistants/neurosift-chat/neurosiftChat/executeJavaScript";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTools = async (_chat: Chat): Promise<QPTool[]> => {
