@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useEffect, useState } from "react";
 import {
     Navigate,
@@ -16,8 +17,9 @@ type MainWindowProps = {
 };
 
 export type Preferences = {
-  assistantDescription: string;
-  newChatTitle: string;
+  assistantSystemPrompt: string;
+  assistantDisplayInfo: any;
+  suggestedPrompts: string[];
 };
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences }) => {

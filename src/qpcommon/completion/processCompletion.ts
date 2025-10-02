@@ -77,7 +77,13 @@ const processCompletion = async (
             break;
           }
           try {
-            const parsed = JSON.parse(data) as ORResponse;
+            let parsed;
+            try {
+              parsed = JSON.parse(data) as ORResponse;
+            } catch (e) {
+              console.warn(data);
+              throw e;
+            }
             const choice = parsed.choices[0];
             if (choice && "delta" in choice) {
               const delta = choice.delta;

@@ -21,7 +21,9 @@ interface ChatPageProps {
 
 const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, getTools, preferences }) => {
   const navigate = useNavigate();
-  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat } = useChat(chatId, getTools, preferences);
+  const [chatIsPublic, setChatIsPublic] = useState<boolean>(!!chatId);
+  const [showPublicInfo, setShowPublicInfo] = useState<boolean>(false);
+  const { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat } = useChat(chatId, getTools, preferences, chatIsPublic);
   const [newPrompt, setNewPrompt] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const conversationRef = useRef<HTMLDivElement>(null);
@@ -139,6 +141,11 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
     setNewPrompt("");
   }, [newPrompt, submitUserMessage, responding]);
 
+  const handleSuggestedPromptClick = useCallback((prompt: string) => {
+    if (responding) return;
+    submitUserMessage(prompt);
+  }, [submitUserMessage, responding]);
+
   const handleNewChat = useCallback(() => {
     if (chatId) {
       navigate("/chat", { replace: true });
@@ -146,7 +153,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
     else {
       clearChat();
     }
-  }, [navigate, chatId]);
+  }, [navigate, chatId, clearChat]);
 
   const allMessagesIncludingPartialResponse = useMemo(() => {
     if (!chat) return [];
@@ -186,32 +193,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
           gap: '12px',
           margin: '8px 20px'
         }}>
-          <div style={{
-            flex: 1,
-            padding: '6px 12px',
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffc107',
-            borderRadius: '4px',
-            color: '#856404',
-            fontSize: '0.9em',
-            textAlign: 'center'
-          }}>
-            ⚠️ Warning: All chats are public.
-          </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button 
-              onClick={() => setIsSettingsOpen(true)}
-              className="new-chat-button"
-              style={{
-                padding: '0.4rem 0.8rem',
-                fontSize: '0.875rem',
-                borderRadius: '6px',
-                flexShrink: 0
-              }}
-              title="Settings"
-            >
-              ⚙️
-            </button>
             <button 
               onClick={handleNewChat} 
               className="new-chat-button"
@@ -231,24 +213,126 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
         </div>
         
         <div className="conversation-area" ref={conversationRef}>
-          {isNewChatMode && chat.messages.length === 0 ? (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-              padding: '40px 20px',
-              textAlign: 'center'
-            }}>
-              <h1 style={{
-                fontSize: '2rem',
-                fontWeight: '600',
-                marginBottom: '1rem',
-                color: '#333'
+          {
+            chatIsPublic && (
+              <div style={{
+                padding: '12px',
+                margin: '10px 20px',
+                backgroundColor: '#e0f7fa',
+                border: '2px solid #4dd0e1',
+                borderRadius: '4px',
+                color: '#006064',
+                fontWeight: 'bold',
+                textAlign: 'center'
               }}>
-                {preferences.newChatTitle || "New Chat"}
-              </h1>
+                This chat is public. Do not share any personal or sensitive information.
+              </div>
+            )
+          }
+          {
+            !chatIsPublic && (
+              <div style={{
+                padding: '12px',
+                margin: '10px 20px',
+                backgroundColor: '#e8f5e9',
+                border: '2px solid #81c784',
+                borderRadius: '4px',
+                color: '#2e7d32'
+              }}>
+                <div style={{
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  marginBottom: '8px'
+                }}>
+                  This chat will not be saved.
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  marginTop: '8px'
+                }}>
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    fontWeight: 'normal'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={chatIsPublic}
+                      onChange={(e) => setChatIsPublic(e.target.checked)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                    Make this chat public
+                  </label>
+                  <button
+                    onClick={() => setShowPublicInfo(!showPublicInfo)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      padding: '0 4px',
+                      color: '#2e7d32'
+                    }}
+                    title={showPublicInfo ? "Hide info" : "Show info"}
+                  >
+                    {showPublicInfo ? '▼' : '▶'}
+                  </button>
+                </div>
+                {showPublicInfo && (
+                  <div style={{
+                    marginTop: '12px',
+                    padding: '10px',
+                    backgroundColor: '#f1f8f4',
+                    borderRadius: '4px',
+                    fontSize: '0.85rem',
+                    lineHeight: '1.5',
+                    color: '#1b5e20',
+                    textAlign: 'left'
+                  }}>
+                    <strong>Why make chats public?</strong>
+                    <p style={{ margin: '8px 0 0 0' }}>
+                      We encourage users to share their conversations publicly. This helps our development team understand how people are using the application, what features work well, and where we can improve.
+                    </p>
+                    <p style={{ margin: '8px 0 0 0', fontStyle: 'italic' }}>
+                      Note: Do not share personal or sensitive information.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )
+          }
+          {
+            <span style={{ 
+              display: 'block', 
+              textAlign: 'center', 
+              margin: '10px 20px', 
+              color: '#666', 
+              fontSize: '0.9rem' 
+            }}>
+              {preferences.assistantDisplayInfo}
+            </span>
+          }
+          {isNewChatMode && chat.messages.length === 0 && preferences.suggestedPrompts.length > 0 ? (
+            <div className="suggested-prompts-container">
+              <h3 className="suggested-prompts-title">Suggested prompts:</h3>
+              <div className="suggested-prompts-grid">
+                {preferences.suggestedPrompts.map((prompt, index) => (
+                  <button
+                    key={index}
+                    className="suggested-prompt-button"
+                    onClick={() => handleSuggestedPromptClick(prompt)}
+                    disabled={responding}
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             <>
@@ -312,7 +396,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
             fontWeight: 'bold',
             textAlign: 'center'
           }}>
-            ⚠️ This model requires an OpenRouter API key. Click the ⚙️ settings button to add your key or select a free model.
+            ⚠️ This model requires an OpenRouter API key. Click the ⚙️ settings button below to add your key or select a less expensive model.
           </div>
         )}
         
@@ -323,7 +407,38 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({ chatId, width, height, get
           disabled={responding || chatDisabledInfo.isDisabled || !!error || (requiresApiKey && !hasApiKey)}
         />
 
-        <UsageDisplay model={chat.model} setModel={setChatModel} totalUsage={chat.totalUsage} />
+        <div style={{
+          padding: '0px 0px',
+          backgroundColor: '#f5f5f5',
+          borderTop: '1px solid #ddd',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px',
+          fontSize: '0.8rem'
+        }}>
+          <UsageDisplay model={chat.model} setModel={setChatModel} totalUsage={chat.totalUsage} />
+          
+          <button 
+            onClick={() => setIsSettingsOpen(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.4rem',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              opacity: 0.7,
+              transition: 'opacity 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+            title="Settings"
+          >
+            ⚙️
+          </button>
+        </div>
       </div>
       
       <SettingsDialog

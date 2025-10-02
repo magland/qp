@@ -1,5 +1,6 @@
 import { FunctionComponent } from "react";
 import { AVAILABLE_MODELS } from "../completion/availableModels";
+import { CHEAP_MODELS } from "../completion/cheapModels";
 
 interface ModelSelectionDialogProps {
   isOpen: boolean;
@@ -37,20 +38,27 @@ const ModelSelectionDialog: FunctionComponent<ModelSelectionDialogProps> = ({
           </button>
         </div>
         <div className="model-list">
-          {AVAILABLE_MODELS.map((modelInfo) => (
-            <div
-              key={modelInfo.model}
-              className={`model-item ${
-                modelInfo.model === currentModel ? "model-item-selected" : ""
-              }`}
-              onClick={() => handleModelClick(modelInfo.model)}
-            >
-              <div className="model-item-label">{modelInfo.label}</div>
-              <div className="model-item-cost">
-                ${modelInfo.cost.prompt}/M in • ${modelInfo.cost.completion}/M out
+          {AVAILABLE_MODELS.map((modelInfo) => {
+            const asterisk = CHEAP_MODELS.includes(modelInfo.model) ? "*" : "";
+            return (
+              <div
+                key={modelInfo.model}
+                className={`model-item ${
+                  modelInfo.model === currentModel ? "model-item-selected" : ""
+                }`}
+                onClick={() => handleModelClick(modelInfo.model)}
+              >
+                <div className="model-item-label">
+                  {modelInfo.label}
+                  {asterisk}
+                </div>
+                <div className="model-item-cost">
+                  ${modelInfo.cost.prompt}/M in • ${modelInfo.cost.completion}/M
+                  out
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

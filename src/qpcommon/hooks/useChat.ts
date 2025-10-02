@@ -5,7 +5,7 @@ import { Chat, ChatMessage } from "../types";
 import { QPTool } from "../types";
 import { Preferences } from "../MainWindow";
 
-const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, preferences: Preferences) => {
+const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, preferences: Preferences, chatIsPublic: boolean) => {
   const isNewChatMode = !chatId || chatId === "";
   const [chat, chatDispatch] = useReducer(chatReducer, emptyChat);
   const [loadingChat, setLoadingChat] = useState<boolean>(!isNewChatMode);
@@ -64,7 +64,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
     setError(null);
     try {
       const tools = toolsForChat;
-      const initialSystemMessage = await getInitialSystemMessage(preferences.assistantDescription, chat, tools);
+      const initialSystemMessage = await getInitialSystemMessage(preferences.assistantSystemPrompt, chat, tools);
       const newMessages = await processCompletion(chat, setPartialResponse, tools, initialSystemMessage);
       for (const newMessage of newMessages) {
         chatDispatch({ type: "add_message", message: newMessage });
@@ -85,7 +85,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
     const lastMessageIsAssistant = chat.messages.length > 0 && chat.messages[chat.messages.length - 1].role === 'assistant';
     if (lastMessageIsAssistant) {
       const assistantMessageHasRedFlag = checkForRedFlags(chat.messages[chat.messages.length - 1].content || "");
-      if (!assistantMessageHasRedFlag) {
+      if (!assistantMessageHasRedFlag && chatIsPublic) {
         // In new chat mode, create the chat in DB for the first time
         if (isNewChatMode && !newChatId) {
           createChatWithContent(chat).then((id) => {
@@ -102,7 +102,7 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
         }
       }
     }
-  }, [chat, isNewChatMode, newChatId]);
+  }, [chat, isNewChatMode, newChatId, chatIsPublic]);
 
   const submitUserMessage = useCallback(async (content: string) => {
     try {
@@ -156,9 +156,9 @@ const useChat = (chatId: string, getTools: (chat: Chat) => Promise<QPTool[]>, pr
   return { chat, submitUserMessage, loadingChat, generateInitialResponse, responding, partialResponse, setChatModel, error, toolsForChat, newChatId, isNewChatMode, clearChat };
 }
 
-const getInitialSystemMessage = async (assistantDescription: string, _chat: Chat, tools: QPTool[]): Promise<string> => {
+const getInitialSystemMessage = async (assistantSystemPrompt: string, _chat: Chat, tools: QPTool[]): Promise<string> => {
   const x: string[] = [];
-  x.push(assistantDescription);
+  x.push(assistantSystemPrompt);
   
   // the completion api will check for these phrases in the system message
   x.push("If the user asks questions that are irrelevant to these instructions, politely refuse to answer and include #irrelevant in your response.");
