@@ -488,6 +488,36 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
               )}
             </div>
           )}
+          {preferences.requiresJupyter && (
+            <div
+              style={{
+                padding: "8px 12px",
+                margin: "10px 20px",
+                backgroundColor: jupyterConnectivity.jupyterServerIsAvailable
+                  ? "#f0f9f4"
+                  : "#fef5f5",
+                border: jupyterConnectivity.jupyterServerIsAvailable
+                  ? "1px solid #c6e8d5"
+                  : "1px solid #f5c6cb",
+                borderRadius: "4px",
+                color: jupyterConnectivity.jupyterServerIsAvailable
+                  ? "#2d5f3f"
+                  : "#7a3e3e",
+                fontSize: "0.85rem",
+                textAlign: "center",
+              }}
+            >
+              {jupyterConnectivity.jupyterServerIsAvailable ? (
+                <>Jupyter server connected</>
+              ) : (
+                <>
+                  Jupyter server not connected. The assistant cannot execute
+                  Python code until a connection is established. Use the ⚙️
+                  settings button below to configure.
+                </>
+              )}
+            </div>
+          )}
           {
             <span
               style={{
@@ -520,6 +550,37 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
             </div>
           ) : (
             <>
+              {preferences.requiresJupyter && (
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    margin: "10px 20px",
+                    backgroundColor:
+                      jupyterConnectivity.jupyterServerIsAvailable
+                        ? "#f0f9f4"
+                        : "#fef5f5",
+                    border: jupyterConnectivity.jupyterServerIsAvailable
+                      ? "1px solid #c6e8d5"
+                      : "1px solid #f5c6cb",
+                    borderRadius: "4px",
+                    color: jupyterConnectivity.jupyterServerIsAvailable
+                      ? "#2d5f3f"
+                      : "#7a3e3e",
+                    fontSize: "0.85rem",
+                    textAlign: "center",
+                  }}
+                >
+                  {jupyterConnectivity.jupyterServerIsAvailable ? (
+                    <>Jupyter server connected</>
+                  ) : (
+                    <>
+                      Jupyter server not connected. The assistant cannot execute
+                      Python code until a connection is established. Use the ⚙️
+                      settings button below to configure.
+                    </>
+                  )}
+                </div>
+              )}
               {allMessagesIncludingPartialResponse.map((xx, index) => (
                 <MessageItem
                   key={index}

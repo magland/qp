@@ -1095,7 +1095,7 @@ button[type="button"] {
 .suggested-prompts-container {
   max-width: 800px;
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 0rem;
   text-align: center;
 }
 
