@@ -1,3 +1,3 @@
-import systemMessageText from './neurosiftChatSystemMessage.txt?raw';
+import systemMessageText from "./neurosiftChatSystemMessage.txt?raw";
 
 export default systemMessageText;

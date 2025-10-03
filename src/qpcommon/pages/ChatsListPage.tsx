@@ -39,7 +39,7 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
     setDeletingChatId(chatId);
     setShowAdminKeyInput(true);
     // Load admin key from localStorage if it exists
-    const savedAdminKey = localStorage.getItem('qp-admin-key');
+    const savedAdminKey = localStorage.getItem("qp-admin-key");
     setAdminKey(savedAdminKey || "");
   }, []);
 
@@ -57,7 +57,7 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
     try {
       await deleteChat(deletingChatId, adminKey.trim());
       // Save admin key to localStorage for future use
-      localStorage.setItem('qp-admin-key', adminKey.trim());
+      localStorage.setItem("qp-admin-key", adminKey.trim());
       setDeletingChatId(null);
       setShowAdminKeyInput(false);
       setAdminKey("");
@@ -71,9 +71,12 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
     }
   }, [deletingChatId, adminKey, loadChats]);
 
-  const handleChatClick = useCallback((chatId: string) => {
-    navigate(`/chat/${chatId}`);
-  }, [navigate]);
+  const handleChatClick = useCallback(
+    (chatId: string) => {
+      navigate(`/chat/${chatId}`);
+    },
+    [navigate],
+  );
 
   const handleNewChat = useCallback(() => {
     navigate("/chat");
@@ -86,9 +89,12 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
   };
 
   const getFirstUserMessage = (chat: Chat): string => {
-    const firstUserMsg = chat.messages.find(msg => msg.role === 'user');
+    const firstUserMsg = chat.messages.find((msg) => msg.role === "user");
     if (!firstUserMsg) return "No messages";
     const content = firstUserMsg.content;
+    if (typeof content !== "string") {
+      return "[complex content]";
+    }
     return content.length > 100 ? content.substring(0, 100) + "..." : content;
   };
 
@@ -109,28 +115,30 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
         </button>
       </div>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {chats.length === 0 ? (
         <div className="no-chats-message">
-          No chats found. <button onClick={handleNewChat} className="inline-link-button">Start a new chat</button>
+          No chats found.{" "}
+          <button onClick={handleNewChat} className="inline-link-button">
+            Start a new chat
+          </button>
         </div>
       ) : (
         <div className="chats-list">
           {chats.map((chat) => (
             <div key={chat.chatId} className="chat-item">
-              <div className="chat-item-content" onClick={() => handleChatClick(chat.chatId)}>
+              <div
+                className="chat-item-content"
+                onClick={() => handleChatClick(chat.chatId)}
+              >
                 <div className="chat-item-header">
                   <span className="chat-id">{chat.chatId}</span>
-                  <span className="chat-date">{formatDate(chat.createdAt)}</span>
+                  <span className="chat-date">
+                    {formatDate(chat.createdAt)}
+                  </span>
                 </div>
-                <div className="chat-preview">
-                  {getFirstUserMessage(chat)}
-                </div>
+                <div className="chat-preview">{getFirstUserMessage(chat)}</div>
                 <div className="chat-stats">
                   <span>{chat.messages.length} messages</span>
                   <span>•</span>
@@ -169,9 +177,9 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
               className="admin-key-input"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   handleConfirmDelete();
-                } else if (e.key === 'Escape') {
+                } else if (e.key === "Escape") {
                   handleCancelDelete();
                 }
               }}

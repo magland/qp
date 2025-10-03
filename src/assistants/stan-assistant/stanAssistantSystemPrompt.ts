@@ -194,5 +194,4 @@ Best practice: record versions, seeds, compiler flags, and data.
 * Good for initializing MCMC
 `;
 
-
 export default stanAssistantSystemPrompt;

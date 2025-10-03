@@ -1,5 +1,11 @@
 import { FunctionComponent, useState, useEffect } from "react";
-import { getStoredApiKey, setStoredApiKey, clearStoredApiKey, maskApiKey } from "../utils/apiKeyStorage";
+import {
+  getStoredApiKey,
+  setStoredApiKey,
+  clearStoredApiKey,
+  maskApiKey,
+} from "../utils/apiKeyStorage";
+import JupyterConfigurationView from "../jupyter/JupyterConfigurationView";
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -60,97 +66,111 @@ const SettingsDialog: FunctionComponent<SettingsDialogProps> = ({
 
   return (
     <div className="model-dialog-overlay" onClick={handleOverlayClick}>
-      <div className="model-dialog" style={{ maxWidth: '500px' }}>
+      <div className="model-dialog" style={{ maxWidth: "800px" }}>
         <div className="model-dialog-header">
           <h3>Settings</h3>
           <button className="model-dialog-close" onClick={onClose}>
             ✕
           </button>
         </div>
-        <div style={{ padding: '20px' }}>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+        <div style={{ padding: "20px" }}>
+          <div style={{ marginBottom: "20px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "8px",
+                fontWeight: "bold",
+              }}
+            >
               OpenRouter API Key
             </label>
-            <p style={{ fontSize: '0.9em', color: '#666', marginBottom: '12px' }}>
-              Required for premium models. Get your key from{' '}
+            <p
+              style={{ fontSize: "0.9em", color: "#666", marginBottom: "12px" }}
+            >
+              Required for premium models. Get your key from{" "}
               <a
                 href="https://openrouter.ai/keys"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: '#007bff', textDecoration: 'underline' }}
+                style={{ color: "#007bff", textDecoration: "underline" }}
               >
                 openrouter.ai/keys
               </a>
             </p>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: "relative" }}>
               <input
                 type={showApiKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-or-v1-..."
                 style={{
-                  width: '100%',
-                  padding: '10px',
-                  paddingRight: '80px',
-                  fontSize: '14px',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  boxSizing: 'border-box',
+                  width: "100%",
+                  padding: "10px",
+                  paddingRight: "80px",
+                  fontSize: "14px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  boxSizing: "border-box",
                 }}
               />
               <button
                 onClick={() => setShowApiKey(!showApiKey)}
                 style={{
-                  position: 'absolute',
-                  right: '8px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  backgroundColor: '#f8f9fa',
-                  color: '#333',
-                  border: '1px solid #ccc',
-                  borderRadius: '3px',
-                  cursor: 'pointer',
+                  position: "absolute",
+                  right: "8px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  padding: "4px 8px",
+                  fontSize: "12px",
+                  backgroundColor: "#f8f9fa",
+                  color: "#333",
+                  border: "1px solid #ccc",
+                  borderRadius: "3px",
+                  cursor: "pointer",
                 }}
               >
-                {showApiKey ? 'Hide' : 'Show'}
+                {showApiKey ? "Hide" : "Show"}
               </button>
             </div>
             {hasStoredKey && (
-              <p style={{ fontSize: '0.85em', color: '#666', marginTop: '8px' }}>
+              <p
+                style={{ fontSize: "0.85em", color: "#666", marginTop: "8px" }}
+              >
                 Current key: {maskApiKey(storedKey)}
               </p>
             )}
           </div>
 
           {savedMessage && (
-            <div style={{
-              padding: '10px',
-              marginBottom: '15px',
-              backgroundColor: '#d4edda',
-              border: '1px solid #c3e6cb',
-              borderRadius: '4px',
-              color: '#155724',
-              textAlign: 'center',
-            }}>
+            <div
+              style={{
+                padding: "10px",
+                marginBottom: "15px",
+                backgroundColor: "#d4edda",
+                border: "1px solid #c3e6cb",
+                borderRadius: "4px",
+                color: "#155724",
+                textAlign: "center",
+              }}
+            >
               {savedMessage}
             </div>
           )}
 
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <div
+            style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}
+          >
             {hasStoredKey && (
               <button
                 onClick={handleClear}
                 style={{
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
+                  padding: "10px 20px",
+                  fontSize: "14px",
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
                 }}
               >
                 Clear Key
@@ -159,13 +179,13 @@ const SettingsDialog: FunctionComponent<SettingsDialogProps> = ({
             <button
               onClick={onClose}
               style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                backgroundColor: '#6c757d',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
+                padding: "10px 20px",
+                fontSize: "14px",
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
               }}
             >
               Cancel
@@ -174,19 +194,20 @@ const SettingsDialog: FunctionComponent<SettingsDialogProps> = ({
               onClick={handleSave}
               disabled={!apiKey.trim()}
               style={{
-                padding: '10px 20px',
-                fontSize: '14px',
-                backgroundColor: apiKey.trim() ? '#007bff' : '#ccc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: apiKey.trim() ? 'pointer' : 'not-allowed',
+                padding: "10px 20px",
+                fontSize: "14px",
+                backgroundColor: apiKey.trim() ? "#007bff" : "#ccc",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: apiKey.trim() ? "pointer" : "not-allowed",
               }}
             >
               Save
             </button>
           </div>
         </div>
+        <JupyterConfigurationView />
       </div>
     </div>
   );

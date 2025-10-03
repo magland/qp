@@ -8,30 +8,30 @@ export async function POST(request: Request) {
     const body = await request.json();
     const chat: Chat = body;
 
-    if (!chat.app || typeof chat.app !== 'string') {
+    if (!chat.app || typeof chat.app !== "string") {
       return NextResponse.json(
         { error: "app is required and must be a string" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!Array.isArray(chat.messages)) {
       return NextResponse.json(
         { error: "messages must be an array" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Generate chatId based on app
-    let prefix = 'chat_';
-    if (chat.app === 'stan-assistant') {
-      prefix = 'st_';
-    }
-    else if (chat.app === 'nwb-assistant') {
-      prefix = 'nwb_';
-    }
-    else if (chat.app === 'neurosift-chat') {
-      prefix = 'ns_';
+    let prefix = "chat_";
+    if (chat.app === "stan-assistant") {
+      prefix = "st_";
+    } else if (chat.app === "nwb-assistant") {
+      prefix = "nwb_";
+    } else if (chat.app === "neurosift-chat") {
+      prefix = "ns_";
+    } else if (chat.app === "test-chat") {
+      prefix = "tc_";
     }
     const chatId = `${prefix}${Date.now()}`;
     const now = new Date();
@@ -41,20 +41,20 @@ export async function POST(request: Request) {
       ...chat,
       chatId,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
     const db = await getDatabase();
-    const chatsCollection = db.collection<Chat>('chats');
-    
+    const chatsCollection = db.collection<Chat>("chats");
+
     await chatsCollection.insertOne(newChat);
 
     return NextResponse.json({ chatId }, { status: 201 });
   } catch (error) {
-    console.error('Error creating chat:', error);
+    console.error("Error creating chat:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -63,18 +63,18 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const app = searchParams.get('app');
+    const app = searchParams.get("app");
 
     if (!app) {
       return NextResponse.json(
         { error: "app parameter is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const db = await getDatabase();
-    const chatsCollection = db.collection<Chat>('chats');
-    
+    const chatsCollection = db.collection<Chat>("chats");
+
     const chats = await chatsCollection
       .find({ app })
       .sort({ updatedAt: -1 })
@@ -82,10 +82,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(chats);
   } catch (error) {
-    console.error('Error fetching chats:', error);
+    console.error("Error fetching chats:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

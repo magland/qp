@@ -33,7 +33,7 @@ export class JobRunnerClient {
       }
 
       const data = await response.json();
-      
+
       // Assuming the response contains an 'output' field
       // Adjust based on actual API response format
       if (data.error) {

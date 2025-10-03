@@ -41,7 +41,9 @@ let cachedDocIndex: string | null = null;
 async function getDocIndex(): Promise<string> {
   if (cachedDocIndex) return cachedDocIndex;
 
-  const response = await fetch("https://raw.githubusercontent.com/magland/nwb-doc-index/refs/heads/main/index.md");
+  const response = await fetch(
+    "https://raw.githubusercontent.com/magland/nwb-doc-index/refs/heads/main/index.md",
+  );
   if (!response.ok) {
     throw new Error(`Error fetching doc index: ${response.statusText}`);
   }
@@ -54,7 +56,7 @@ export const execute = async (
   params: RetrieveNwbDocsParams,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _o: any,
-): Promise<string> => {
+): Promise<{ result: string }> => {
   const { urls } = params;
 
   try {
@@ -68,64 +70,63 @@ export const execute = async (
         }
         const content = await response.text();
         return { url, content };
-      })
+      }),
     );
 
-    return JSON.stringify(results, null, 2);
+    return { result: JSON.stringify(results, null, 2) };
   } catch (error) {
-    return JSON.stringify(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      null,
-      2
-    );
+    console.warn("Error in retrieve nwb docs:", error);
+    return { result: error instanceof Error ? error.message : "Unknown error" };
   }
 };
 
 const getSourceUrl = (url: string): string => {
-    // https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/behavior/audio.html
-    // goes to
-    // https://raw.githubusercontent.com/catalystneuro/neuroconv/refs/heads/main/docs/conversion_examples_gallery/behavior/audio.rst
-    if (url.startsWith("https://neuroconv.readthedocs.io/")) {
-        let relpart = url.slice("https://neuroconv.readthedocs.io/en/main/".length);
-        relpart = relpart.replace(/\.html$/, ".rst");
-        return `https://raw.githubusercontent.com/catalystneuro/neuroconv/refs/heads/main/docs/${relpart}`;
-    }
+  // https://neuroconv.readthedocs.io/en/main/conversion_examples_gallery/behavior/audio.html
+  // goes to
+  // https://raw.githubusercontent.com/catalystneuro/neuroconv/refs/heads/main/docs/conversion_examples_gallery/behavior/audio.rst
+  if (url.startsWith("https://neuroconv.readthedocs.io/")) {
+    let relpart = url.slice("https://neuroconv.readthedocs.io/en/main/".length);
+    relpart = relpart.replace(/\.html$/, ".rst");
+    return `https://raw.githubusercontent.com/catalystneuro/neuroconv/refs/heads/main/docs/${relpart}`;
+  }
 
-    // https://pynwb.readthedocs.io/en/latest/tutorials/general/plot_file.html
-    // goes to
-    // https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/refs/heads/dev/docs/gallery/general/plot_file.py
-    if (url.startsWith("https://pynwb.readthedocs.io/")) {
-        let relpart = url.slice("https://pynwb.readthedocs.io/en/latest/".length);
-        relpart = relpart.replace(/\.html$/, ".py");
-        relpart = relpart.replace(/tutorials\//, "gallery/");
-        return `https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/refs/heads/dev/docs/${relpart}`;
-    }
+  // https://pynwb.readthedocs.io/en/latest/tutorials/general/plot_file.html
+  // goes to
+  // https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/refs/heads/dev/docs/gallery/general/plot_file.py
+  if (url.startsWith("https://pynwb.readthedocs.io/")) {
+    let relpart = url.slice("https://pynwb.readthedocs.io/en/latest/".length);
+    relpart = relpart.replace(/\.html$/, ".py");
+    relpart = relpart.replace(/tutorials\//, "gallery/");
+    return `https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/refs/heads/dev/docs/${relpart}`;
+  }
 
-    // https://nwbinspector.readthedocs.io/en/dev/best_practices/behavior.html
-    // goes to
-    // https://raw.githubusercontent.com/catalystneuro/nwbinspector/refs/heads/dev/docs/best_practices/behavior.rst
-    if (url.startsWith("https://nwbinspector.readthedocs.io/")) {
-        let relpart = url.slice("https://nwbinspector.readthedocs.io/en/dev/".length);
-        relpart = relpart.replace(/\.html$/, ".rst");
-        return `https://raw.githubusercontent.com/catalystneuro/nwbinspector/refs/heads/dev/docs/${relpart}`;
-    }
+  // https://nwbinspector.readthedocs.io/en/dev/best_practices/behavior.html
+  // goes to
+  // https://raw.githubusercontent.com/catalystneuro/nwbinspector/refs/heads/dev/docs/best_practices/behavior.rst
+  if (url.startsWith("https://nwbinspector.readthedocs.io/")) {
+    let relpart = url.slice(
+      "https://nwbinspector.readthedocs.io/en/dev/".length,
+    );
+    relpart = relpart.replace(/\.html$/, ".rst");
+    return `https://raw.githubusercontent.com/catalystneuro/nwbinspector/refs/heads/dev/docs/${relpart}`;
+  }
 
-    // https://hdmf.readthedocs.io/en/stable/tutorials/multicontainerinterface.html
-    // goes to
-    // https://raw.githubusercontent.com/hdmf-dev/hdmf/refs/heads/dev/docs/gallery/multicontainerinterface.py
-    if (url.startsWith("https://hdmf.readthedocs.io/")) {
-        let relpart = url.slice("https://hdmf.readthedocs.io/en/stable/".length);
-        relpart = relpart.replace(/\.html$/, ".py");
-        relpart = relpart.replace(/tutorials\//, "gallery/");
-        return `https://raw.githubusercontent.com/hdmf-dev/hdmf/refs/heads/dev/docs/${relpart}`;
-    }
+  // https://hdmf.readthedocs.io/en/stable/tutorials/multicontainerinterface.html
+  // goes to
+  // https://raw.githubusercontent.com/hdmf-dev/hdmf/refs/heads/dev/docs/gallery/multicontainerinterface.py
+  if (url.startsWith("https://hdmf.readthedocs.io/")) {
+    let relpart = url.slice("https://hdmf.readthedocs.io/en/stable/".length);
+    relpart = relpart.replace(/\.html$/, ".py");
+    relpart = relpart.replace(/tutorials\//, "gallery/");
+    return `https://raw.githubusercontent.com/hdmf-dev/hdmf/refs/heads/dev/docs/${relpart}`;
+  }
 
-    throw new Error(`Unsupported URL: ${url}`);
-}
+  throw new Error(`Unsupported URL: ${url}`);
+};
 
 export const getDetailedDescription = async () => {
-    const docIndex = await getDocIndex();
-    return `Retrieve content from a list of document URLs.
+  const docIndex = await getDocIndex();
+  return `Retrieve content from a list of document URLs.
 
 The tool first validates that all provided URLs are in the allowed list
 
@@ -144,7 +145,7 @@ export const requiresPermission = false;
 
 export const createToolCallView = (
   toolCall: ORToolCall,
-  toolOutput: (ChatMessage & { role: "tool" }) | undefined
+  toolOutput: (ChatMessage & { role: "tool" }) | undefined,
 ): React.JSX.Element => {
   const args = JSON.parse(toolCall.function.arguments || "{}");
   const urls: string[] = args.urls || [];
@@ -158,10 +159,18 @@ export const createToolCallView = (
   } else {
     return (
       <div className="tool-call-message">
-        retrieved {urls.map((url) => {
+        retrieved{" "}
+        {urls.map((url) => {
           const parts = url.split("/");
           const fileName = parts[parts.length - 1];
-          return <span key={url}><a href={url} target="_blank" rel="noreferrer">{fileName}</a>&nbsp;</span>;
+          return (
+            <span key={url}>
+              <a href={url} target="_blank" rel="noreferrer">
+                {fileName}
+              </a>
+              &nbsp;
+            </span>
+          );
         })}
       </div>
     );

@@ -1,6 +1,6 @@
 import { FunctionComponent, useState } from "react";
 import MarkdownContent from "../components/MarkdownContent";
-import { ChatMessage, QPTool } from "../types";
+import { ChatMessage, ORContentPart, QPTool } from "../types";
 
 const AssistantMessageItem: FunctionComponent<{
   message: ChatMessage & { role: "assistant" };
@@ -8,10 +8,22 @@ const AssistantMessageItem: FunctionComponent<{
   tools: QPTool[];
   inProgress: boolean;
   chatId?: string;
-  onFeedbackUpdate?: (feedback: { thumbs?: "up" | "down"; comment?: string }) => void;
-}> = ({ message, allToolMessages, tools, inProgress, chatId, onFeedbackUpdate }) => {
+  onFeedbackUpdate?: (feedback: {
+    thumbs?: "up" | "down";
+    comment?: string;
+  }) => void;
+}> = ({
+  message,
+  allToolMessages,
+  tools,
+  inProgress,
+  chatId,
+  onFeedbackUpdate,
+}) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
-  const [commentText, setCommentText] = useState(message.feedback?.comment || "");
+  const [commentText, setCommentText] = useState(
+    message.feedback?.comment || "",
+  );
   const [showPublicChatMessage, setShowPublicChatMessage] = useState(false);
 
   const handleThumbClick = (thumbType: "up" | "down") => {
@@ -21,7 +33,7 @@ const AssistantMessageItem: FunctionComponent<{
     }
 
     const currentThumb = message.feedback?.thumbs;
-    
+
     if (currentThumb === thumbType) {
       // Clicking same thumb - allow editing
       setShowCommentInput(true);
@@ -56,7 +68,7 @@ const AssistantMessageItem: FunctionComponent<{
       {message.content && (
         <div className="message-bubble message-bubble-assistant">
           <MarkdownContent
-            content={message.content || ""}
+            content={messageContentToString(message.content)}
             doRehypeRaw={!inProgress}
           />
         </div>
@@ -66,7 +78,14 @@ const AssistantMessageItem: FunctionComponent<{
       {!inProgress && !message.tool_calls && (
         <div style={{ marginTop: "8px", marginLeft: "12px", width: "100%" }}>
           {/* Thumbs buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              width: "100%",
+            }}
+          >
             <button
               onClick={() => handleThumbClick("up")}
               style={{
@@ -77,9 +96,10 @@ const AssistantMessageItem: FunctionComponent<{
                 padding: "4px 8px",
                 opacity: message.feedback?.thumbs === "up" ? 1 : 0.4,
                 transition: "opacity 0.2s, filter 0.2s",
-                filter: message.feedback?.thumbs === "up" 
-                  ? "hue-rotate(90deg) saturate(0.5) brightness(0.9)" 
-                  : "grayscale(100%)",
+                filter:
+                  message.feedback?.thumbs === "up"
+                    ? "hue-rotate(90deg) saturate(0.5) brightness(0.9)"
+                    : "grayscale(100%)",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
               onMouseLeave={(e) =>
@@ -100,9 +120,10 @@ const AssistantMessageItem: FunctionComponent<{
                 padding: "4px 8px",
                 opacity: message.feedback?.thumbs === "down" ? 1 : 0.4,
                 transition: "opacity 0.2s, filter 0.2s",
-                filter: message.feedback?.thumbs === "down" 
-                  ? "hue-rotate(-60deg) saturate(0.5) brightness(1.1)" 
-                  : "grayscale(100%)",
+                filter:
+                  message.feedback?.thumbs === "down"
+                    ? "hue-rotate(-60deg) saturate(0.5) brightness(1.1)"
+                    : "grayscale(100%)",
               }}
               onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
               onMouseLeave={(e) =>
@@ -113,7 +134,7 @@ const AssistantMessageItem: FunctionComponent<{
             >
               👎
             </button>
-            
+
             {/* Clear feedback button - only shown when feedback exists */}
             {(message.feedback?.thumbs || message.feedback?.comment) && (
               <button
@@ -157,8 +178,8 @@ const AssistantMessageItem: FunctionComponent<{
                 color: "#856404",
               }}
             >
-              Please make this chat public to provide feedback. We appreciate and
-              encourage your feedback!
+              Please make this chat public to provide feedback. We appreciate
+              and encourage your feedback!
               <button
                 onClick={() => setShowPublicChatMessage(false)}
                 style={{
@@ -194,7 +215,14 @@ const AssistantMessageItem: FunctionComponent<{
                   boxSizing: "border-box",
                 }}
               />
-              <div style={{ marginTop: "6px", display: "flex", gap: "8px", paddingLeft: "12px" }}>
+              <div
+                style={{
+                  marginTop: "6px",
+                  display: "flex",
+                  gap: "8px",
+                  paddingLeft: "12px",
+                }}
+              >
                 <button
                   onClick={handleSubmitComment}
                   style={{
@@ -258,7 +286,7 @@ const AssistantMessageItem: FunctionComponent<{
         <div className="tool-calls-container">
           {message.tool_calls.map((toolCall, index) => {
             const correspondingToolMessage = allToolMessages.find(
-              (m) => m.role === "tool" && m.tool_call_id === toolCall.id
+              (m) => m.role === "tool" && m.tool_call_id === toolCall.id,
             );
             if (
               correspondingToolMessage &&
@@ -267,14 +295,14 @@ const AssistantMessageItem: FunctionComponent<{
               throw new Error("Mismatched tool message role");
             }
             const correspondingTool = tools.find(
-              (t) => t.toolFunction.name === toolCall.function.name
+              (t) => t.toolFunction.name === toolCall.function.name,
             );
             if (correspondingTool && correspondingTool.createToolCallView) {
               return (
                 <span key={index}>
                   {correspondingTool.createToolCallView(
                     toolCall,
-                    correspondingToolMessage
+                    correspondingToolMessage,
                   )}
                 </span>
               );
@@ -298,6 +326,23 @@ const AssistantMessageItem: FunctionComponent<{
       )}
     </div>
   );
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const messageContentToString = (
+  content: string | ORContentPart[] | null,
+) => {
+  if (!content) return "";
+  if (typeof content === "string") return content;
+  // else it's ORContentPart[]
+  return content
+    .map((part) => {
+      if (part.type === "text") return part.text;
+      else if (part.type === "image_url")
+        return `![Image](${part.image_url.url})`;
+      else return "";
+    })
+    .join("\n");
 };
 
 export default AssistantMessageItem;

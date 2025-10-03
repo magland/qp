@@ -1,15 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FunctionComponent, useEffect, useState } from "react";
-import {
-    Navigate,
-    Route,
-    Routes,
-    useLocation
-} from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import ChatPage from "./pages/ChatPage";
 import ChatsListPage from "./pages/ChatsListPage";
 import { Chat } from "./types";
 import { QPTool } from "./types";
+import { JupyterConnectivityProvider } from "./jupyter/JupyterConnectivityProvider";
 
 type MainWindowProps = {
   getTools: (chat: Chat) => Promise<QPTool[]>;
@@ -22,7 +18,10 @@ export type Preferences = {
   suggestedPrompts: string[];
 };
 
-const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences }) => {
+const MainWindow: FunctionComponent<MainWindowProps> = ({
+  getTools,
+  preferences,
+}) => {
   const [windowDimensions, setWindowDimensions] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -43,8 +42,8 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences 
   const chatId = location.pathname.startsWith("/chat/")
     ? location.pathname.replace("/chat/", "")
     : location.pathname === "/chat"
-    ? ""
-    : null;
+      ? ""
+      : null;
 
   return (
     <Routes>
@@ -61,32 +60,36 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({ getTools, preferences 
       <Route
         path="/chat"
         element={
-          <ChatPage
-            key="new-chat" // Force remount when switching to new chat
-            width={windowDimensions.width}
-            height={windowDimensions.height}
-            chatId=""
-            getTools={getTools}
-            preferences={preferences}
-          />
+          <JupyterConnectivityProvider mode="jupyter-server">
+            <ChatPage
+              key="new-chat" // Force remount when switching to new chat
+              width={windowDimensions.width}
+              height={windowDimensions.height}
+              chatId=""
+              getTools={getTools}
+              preferences={preferences}
+            />
+          </JupyterConnectivityProvider>
         }
       />
       <Route
         path="/chat/:chatId"
         element={
-          <ChatPage
-            key={chatId} // Force remount when switching chats
-            width={windowDimensions.width}
-            height={windowDimensions.height}
-            chatId={chatId || ""}
-            getTools={getTools}
-            preferences={preferences}
-          />
+          <JupyterConnectivityProvider mode="jupyter-server">
+            <ChatPage
+              key={chatId} // Force remount when switching chats
+              width={windowDimensions.width}
+              height={windowDimensions.height}
+              chatId={chatId || ""}
+              getTools={getTools}
+              preferences={preferences}
+            />
+          </JupyterConnectivityProvider>
         }
       />
       <Route path="*" element={<Navigate to="/chat" />} />
     </Routes>
   );
-}
+};
 
 export default MainWindow;

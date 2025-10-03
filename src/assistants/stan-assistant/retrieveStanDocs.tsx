@@ -303,7 +303,7 @@ export const getDocPages = (): DocPage[] => {
       sourceUrl:
         "https://raw.githubusercontent.com/stan-dev/docs/refs/heads/master/src/stan-users-guide/for-bugs-users.qmd",
       includeFromStart: false,
-    }
+    },
   ];
   // if (cachedDocPages) {
   //   return cachedDocPages;
@@ -453,8 +453,8 @@ export const getDocPages = (): DocPage[] => {
 export const execute = async (
   params: RetrieveStanDocsParams,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _o: any
-): Promise<string> => {
+  _o: any,
+): Promise<{ result: string }> => {
   const { urls } = params;
 
   try {
@@ -468,13 +468,13 @@ export const execute = async (
         }
         const content = await response.text();
         return { url, content };
-      })
+      }),
     );
 
-    return JSON.stringify(results, null, 2);
+    return { result: JSON.stringify(results, null, 2) };
   } catch (error) {
     console.warn("Error in retrieve_docs:", error);
-    return error instanceof Error ? error.message : "Unknown error";
+    return { result: error instanceof Error ? error.message : "Unknown error" };
   }
 };
 
@@ -496,9 +496,8 @@ export const getDetailedDescription = async () => {
         if (response.ok) {
           preloadedContent[doc.url] = await response.text();
         } else {
-          preloadedContent[
-            doc.url
-          ] = `Error fetching document: ${response.statusText}`;
+          preloadedContent[doc.url] =
+            `Error fetching document: ${response.statusText}`;
         }
       } catch (error) {
         preloadedContent[doc.url] = `Error fetching document: ${
@@ -518,7 +517,9 @@ export const getDetailedDescription = async () => {
   retLines.push("Retrieve content from a list of Stan document URLs.");
   retLines.push("");
 
-  retLines.push("The tool first validates that all provided URLs are in the allowed list");
+  retLines.push(
+    "The tool first validates that all provided URLs are in the allowed list",
+  );
   retLines.push("");
 
   retLines.push("The output is a JSON array where each element has the form:");
@@ -528,15 +529,19 @@ export const getDetailedDescription = async () => {
   retLines.push("}");
   retLines.push("");
 
-  retLines.push("Here is the list of all available Stan documents with descriptions:");
+  retLines.push(
+    "Here is the list of all available Stan documents with descriptions:",
+  );
   for (const a of list) {
     retLines.push(a);
   }
   retLines.push("");
 
-  if (docPages.filter(doc => doc.includeFromStart).length > 0) {
-    retLines.push("Here are the contents of some of those documents which have been preloaded:");
-    for (const doc of docPages.filter(doc => doc.includeFromStart)) {
+  if (docPages.filter((doc) => doc.includeFromStart).length > 0) {
+    retLines.push(
+      "Here are the contents of some of those documents which have been preloaded:",
+    );
+    for (const doc of docPages.filter((doc) => doc.includeFromStart)) {
       retLines.push("");
       retLines.push(`### ${doc.title}`);
       retLines.push("");
@@ -550,13 +555,13 @@ export const getDetailedDescription = async () => {
   }
 
   return retLines.join("\n");
-}
+};
 
 export const requiresPermission = false;
 
 export const createToolCallView = (
   toolCall: ORToolCall,
-  toolOutput: (ChatMessage & { role: "tool" }) | undefined
+  toolOutput: (ChatMessage & { role: "tool" }) | undefined,
 ): React.JSX.Element => {
   const args = JSON.parse(toolCall.function.arguments || "{}");
   const urls: string[] = args.urls || [];
@@ -570,10 +575,18 @@ export const createToolCallView = (
   } else {
     return (
       <div className="tool-call-message">
-        retrieved {urls.map((url) => {
+        retrieved{" "}
+        {urls.map((url) => {
           const parts = url.split("/");
           const fileName = parts[parts.length - 1];
-          return <span key={url}><a href={url} target="_blank" rel="noreferrer">{fileName}</a>&nbsp;</span>;
+          return (
+            <span key={url}>
+              <a href={url} target="_blank" rel="noreferrer">
+                {fileName}
+              </a>
+              &nbsp;
+            </span>
+          );
         })}
       </div>
     );

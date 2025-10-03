@@ -9,14 +9,19 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Preferences } from "../MainWindow";
 import { CHEAP_MODELS } from "../completion/cheapModels";
-import AssistantMessageItem from "../components/AssistantMessageItem";
+import AssistantMessageItem, {
+  messageContentToString,
+} from "../components/AssistantMessageItem";
 import ChatInput from "../components/ChatInput";
 import SettingsDialog from "../components/SettingsDialog";
 import UsageDisplay from "../components/UsageDisplay";
 import useChat from "../hooks/useChat";
 import { Chat, ChatMessage, QPTool } from "../types";
 import { getStoredApiKey } from "../utils/apiKeyStorage";
-import { saveChat } from "../interface/interface";
+import { saveChat, createChatWithContent } from "../interface/interface";
+import { useJupyterConnectivity } from "../jupyter/JupyterConnectivity";
+import MarkdownContent from "../components/MarkdownContent";
+import { Box } from "@mui/material";
 
 interface ChatPageProps {
   width: number;
@@ -36,6 +41,14 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
   const navigate = useNavigate();
   const [chatIsPublic, setChatIsPublic] = useState<boolean>(!!chatId);
   const [showPublicInfo, setShowPublicInfo] = useState<boolean>(false);
+  const previousChatIsPublic = useRef<boolean>(!!chatId);
+  const jupyterConnectivity = useJupyterConnectivity();
+  const toolExecutionContext = useMemo(() => {
+    return {
+      jupyterConnectivity: jupyterConnectivity,
+      imageUrlsNeedToBeUser: true,
+    };
+  }, [jupyterConnectivity]);
   const {
     chat,
     submitUserMessage,
@@ -50,13 +63,47 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
     isNewChatMode,
     clearChat,
     chatDispatch,
-  } = useChat(chatId, getTools, preferences, chatIsPublic);
+  } = useChat(
+    chatId,
+    getTools,
+    preferences,
+    chatIsPublic,
+    toolExecutionContext,
+  );
   const [newPrompt, setNewPrompt] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const conversationRef = useRef<HTMLDivElement>(null);
 
   // make sure we never generate the initial response more than once
   const generatedInitialResponse = useRef(false);
+
+  // Save chat when making it public if there are already messages
+  useEffect(() => {
+    if (
+      !previousChatIsPublic.current &&
+      chatIsPublic &&
+      chat &&
+      chat.messages.length > 0
+    ) {
+      // Chat was just made public and has messages - save it
+      if (isNewChatMode && !newChatId) {
+        // Create new chat in DB for the first time
+        createChatWithContent(chat)
+          .then((id: string) => {
+            navigate(`/chat/${id}`);
+          })
+          .catch((err: Error) => {
+            console.error("Error saving chat when making public:", err);
+          });
+      } else if (!isNewChatMode && chatId) {
+        // Update existing chat
+        saveChat(chat).catch((err) => {
+          console.error("Error saving chat when making public:", err);
+        });
+      }
+    }
+    previousChatIsPublic.current = chatIsPublic;
+  }, [chatIsPublic, chat, isNewChatMode, newChatId, chatId, navigate]);
 
   // Navigate to the new chat once it's created
   useEffect(() => {
@@ -90,7 +137,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
       return { isDisabled: false, reason: "" };
     }
 
-    const content = (lastMessage.content || "").toLowerCase();
+    const content = messageContentToString(lastMessage.content).toLowerCase();
 
     if (content.includes("#irrelevant")) {
       return {
@@ -183,7 +230,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
       if (responding) return;
       submitUserMessage(prompt);
     },
-    [submitUserMessage, responding]
+    [submitUserMessage, responding],
   );
 
   const handleNewChat = useCallback(() => {
@@ -195,14 +242,17 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
   }, [navigate, chatId, clearChat]);
 
   const handleFeedbackUpdate = useCallback(
-    (messageIndex: number, feedback: { thumbs?: "up" | "down"; comment?: string }) => {
+    (
+      messageIndex: number,
+      feedback: { thumbs?: "up" | "down"; comment?: string },
+    ) => {
       if (chatDispatch) {
         chatDispatch({
           type: "update_message_feedback",
           messageIndex,
           feedback,
         });
-        
+
         // Save to database if chat is public
         if (chatId && chat) {
           // Create updated chat with the feedback
@@ -218,14 +268,39 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
               return msg;
             }),
           };
-          
+
           saveChat(updatedChat).catch((err) => {
             console.error("Error saving feedback:", err);
           });
         }
       }
     },
-    [chatDispatch, chatId, chat]
+    [chatDispatch, chatId, chat],
+  );
+
+  const handleDeleteMessage = useCallback(
+    (messageIndex: number) => {
+      if (chatDispatch) {
+        chatDispatch({
+          type: "delete_message_from_index",
+          messageIndex,
+        });
+
+        // Save to database if chat is public
+        if (chatId && chat) {
+          // Create updated chat with messages deleted from index
+          const updatedChat = {
+            ...chat,
+            messages: chat.messages.slice(0, messageIndex),
+          };
+
+          saveChat(updatedChat).catch((err) => {
+            console.error("Error saving deleted messages:", err);
+          });
+        }
+      }
+    },
+    [chatDispatch, chatId, chat],
   );
 
   const allMessagesIncludingPartialResponse = useMemo(() => {
@@ -355,16 +430,18 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    cursor: "pointer",
+                    cursor: responding ? "not-allowed" : "pointer",
                     fontSize: "0.9rem",
                     fontWeight: "normal",
+                    opacity: responding ? 0.5 : 1,
                   }}
                 >
                   <input
                     type="checkbox"
                     checked={chatIsPublic}
                     onChange={(e) => setChatIsPublic(e.target.checked)}
-                    style={{ cursor: "pointer" }}
+                    disabled={responding}
+                    style={{ cursor: responding ? "not-allowed" : "pointer" }}
                   />
                   Make this chat public
                 </label>
@@ -424,8 +501,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
               {preferences.assistantDisplayInfo}
             </span>
           }
-          {isNewChatMode &&
-          chat.messages.length === 0 &&
+          {chat.messages.length === 0 &&
           preferences.suggestedPrompts.length > 0 ? (
             <div className="suggested-prompts-container">
               <h3 className="suggested-prompts-title">Suggested prompts:</h3>
@@ -454,6 +530,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                   chatId={chatId}
                   messageIndex={index}
                   onFeedbackUpdate={handleFeedbackUpdate}
+                  onDeleteMessage={handleDeleteMessage}
                 />
               ))}
 
@@ -592,14 +669,101 @@ const MessageItem: FunctionComponent<{
   inProgress: boolean;
   chatId?: string;
   messageIndex: number;
-  onFeedbackUpdate: (messageIndex: number, feedback: { thumbs?: "up" | "down"; comment?: string }) => void;
-}> = ({ message, allToolMessages, tools, inProgress, chatId, messageIndex, onFeedbackUpdate }) => {
+  onFeedbackUpdate: (
+    messageIndex: number,
+    feedback: { thumbs?: "up" | "down"; comment?: string },
+  ) => void;
+  onDeleteMessage: (messageIndex: number) => void;
+}> = ({
+  message,
+  allToolMessages,
+  tools,
+  inProgress,
+  chatId,
+  messageIndex,
+  onFeedbackUpdate,
+  onDeleteMessage,
+}) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   if (message.role === "user") {
     return (
-      <div className="message message-user">
+      <div
+        className="message message-user"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ position: "relative" }}
+      >
         <div className="message-bubble message-bubble-user">
-          {message.content}
+          {typeof message.content === "string" ? (
+            messageContentToString(message.content)
+          ) : Array.isArray(message.content) ? (
+            // Handle array of content parts (e.g. text + images)
+            message.content.map((part, index) => {
+              if (part.type === "text") {
+                return (
+                  <MarkdownContent
+                    key={index}
+                    content={part.text}
+                    // onSpecialLinkClicked={onSpecialLinkClicked}
+                  />
+                );
+              }
+              if (part.type === "image_url") {
+                return (
+                  <Box key={index} sx={{ mt: 1 }}>
+                    <img
+                      src={part.image_url.url}
+                      alt="Content"
+                      style={{ borderRadius: 4 }}
+                    />
+                  </Box>
+                );
+              }
+              return null;
+            })
+          ) : (
+            <>Unsupported message format</>
+          )}
         </div>
+        {isHovered && typeof message.content === "string" && (
+          <button
+            onClick={() => onDeleteMessage(messageIndex)}
+            style={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              background: "rgba(255, 255, 255, 0.7)",
+              border: "1px solid rgba(0, 0, 0, 0.1)",
+              borderRadius: "4px",
+              padding: "2px 6px",
+              cursor: "pointer",
+              fontSize: "0.75rem",
+              color: "#999",
+              display: "flex",
+              alignItems: "center",
+              gap: "3px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              transition: "all 0.2s",
+              opacity: 0.6,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.background = "#fee";
+              e.currentTarget.style.borderColor = "#c00";
+              e.currentTarget.style.color = "#c00";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "0.6";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.7)";
+              e.currentTarget.style.borderColor = "rgba(0, 0, 0, 0.1)";
+              e.currentTarget.style.color = "#999";
+            }}
+            title="Delete this message and all messages after it"
+          >
+            🗑️
+          </button>
+        )}
       </div>
     );
   } else if (message.role === "assistant") {
@@ -610,7 +774,9 @@ const MessageItem: FunctionComponent<{
         tools={tools}
         inProgress={inProgress}
         chatId={chatId}
-        onFeedbackUpdate={(feedback) => onFeedbackUpdate(messageIndex, feedback)}
+        onFeedbackUpdate={(feedback) =>
+          onFeedbackUpdate(messageIndex, feedback)
+        }
       />
     );
   } else {

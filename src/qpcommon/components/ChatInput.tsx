@@ -13,30 +13,33 @@ const ChatInput: FunctionComponent<ChatInputProps> = ({
   onChange,
   onSubmit,
   disabled = false,
-  placeholder = "Type your message here... (Enter to send, Shift+Enter for new line)"
+  placeholder = "Type your message here... (Enter to send, Shift+Enter for new line)",
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
     }
   }, [value]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      if (e.shiftKey) {
-        // Shift+Enter: allow default behavior (new line)
-        return;
-      } else {
-        // Enter: submit
-        e.preventDefault();
-        onSubmit();
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        if (e.shiftKey) {
+          // Shift+Enter: allow default behavior (new line)
+          return;
+        } else {
+          // Enter: submit
+          e.preventDefault();
+          onSubmit();
+        }
       }
-    }
-  }, [onSubmit]);
+    },
+    [onSubmit],
+  );
 
   const handleSubmit = useCallback(() => {
     if (value.trim() === "" || disabled) return;

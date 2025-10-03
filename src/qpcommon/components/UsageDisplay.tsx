@@ -29,7 +29,10 @@ const UsageDisplay: FunctionComponent<UsageDisplayProps> = ({
   return (
     <>
       <div className="usage-display">
-        <span className="model-name-clickable" onClick={() => setIsDialogOpen(true)}>
+        <span
+          className="model-name-clickable"
+          onClick={() => setIsDialogOpen(true)}
+        >
           {model}
         </span>{" "}
         • {formatTokens(totalUsage.promptTokens)} in •{" "}

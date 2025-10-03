@@ -14,7 +14,7 @@ export const toolFunction: QPFunctionDescription = {
       script: {
         type: "string",
         description: "JavaScript code to execute",
-      }
+      },
     },
     required: ["script"],
   },
@@ -38,7 +38,7 @@ export const execute = async (
   params: ExecuteJavaScriptParams,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _o: any,
-): Promise<string> => {
+): Promise<{ result: string }> => {
   const { script } = params;
 
   console.info("Executing script:");
@@ -49,15 +49,17 @@ export const execute = async (
 
     console.info("Script output:");
     console.info(scriptOutput);
-    return scriptOutput;
+    return { result: scriptOutput };
   } catch (error) {
-    console.error('Error executing script:', error);
-    return `Script execution failed: ${error instanceof Error ? error.message : String(error)}`;
+    console.error("Error executing script:", error);
+    return {
+      result: `Script execution failed: ${error instanceof Error ? error.message : String(error)}`,
+    };
   }
 };
 
 export const getDetailedDescription = async () => {
-    return `Execute a JavaScript script for probing databases`;
+  return `Execute a JavaScript script for probing databases`;
 };
 
 export const requiresPermission = false;
@@ -71,11 +73,11 @@ const ExecuteJavaScriptToolCallView = ({
   toolOutput: (ChatMessage & { role: "tool" }) | undefined;
 }): React.JSX.Element => {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   // Parse the script from tool call arguments
   const args = JSON.parse(toolCall.function.arguments || "{}");
   const script: string = args.script || "";
-  
+
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
@@ -107,7 +109,9 @@ const ExecuteJavaScriptToolCallView = ({
             {script && (
               <div>
                 <strong>Script:</strong>
-                <MarkdownContent content={`\`\`\`javascript\n${script}\n\`\`\``} />
+                <MarkdownContent
+                  content={`\`\`\`javascript\n${script}\n\`\`\``}
+                />
               </div>
             )}
             {output && (
@@ -125,7 +129,12 @@ const ExecuteJavaScriptToolCallView = ({
 
 export const createToolCallView = (
   toolCall: ORToolCall,
-  toolOutput: (ChatMessage & { role: "tool" }) | undefined
+  toolOutput: (ChatMessage & { role: "tool" }) | undefined,
 ): React.JSX.Element => {
-  return <ExecuteJavaScriptToolCallView toolCall={toolCall} toolOutput={toolOutput} />;
+  return (
+    <ExecuteJavaScriptToolCallView
+      toolCall={toolCall}
+      toolOutput={toolOutput}
+    />
+  );
 };
