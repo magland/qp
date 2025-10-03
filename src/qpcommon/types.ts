@@ -90,6 +90,10 @@ export interface ToolExecutionContext {
   onCancelRef?: {
     onCancel?: () => void;
   };
+  requestPermission?: (
+    toolName: string,
+    toolDescription: string,
+  ) => Promise<boolean>;
 }
 
 export type QPFunctionDescription = {

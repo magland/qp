@@ -22,6 +22,7 @@ import { saveChat, createChatWithContent } from "../interface/interface";
 import { useJupyterConnectivity } from "../jupyter/JupyterConnectivity";
 import MarkdownContent from "../components/MarkdownContent";
 import { Box } from "@mui/material";
+import ToolPermissionPrompt from "../components/ToolPermissionPrompt";
 
 interface ChatPageProps {
   width: number;
@@ -43,12 +44,42 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
   const [showPublicInfo, setShowPublicInfo] = useState<boolean>(false);
   const previousChatIsPublic = useRef<boolean>(!!chatId);
   const jupyterConnectivity = useJupyterConnectivity();
+  const [permissionRequest, setPermissionRequest] = useState<{
+    toolName: string;
+    toolDescription: string;
+    resolve: (granted: boolean) => void;
+  } | null>(null);
+
+  const handleRequestPermission = useCallback(
+    (toolName: string, toolDescription: string): Promise<boolean> => {
+      return new Promise((resolve) => {
+        setPermissionRequest({ toolName, toolDescription, resolve });
+      });
+    },
+    [],
+  );
+
+  const handleAllowPermission = useCallback(() => {
+    if (permissionRequest) {
+      permissionRequest.resolve(true);
+      setPermissionRequest(null);
+    }
+  }, [permissionRequest]);
+
+  const handleDenyPermission = useCallback(() => {
+    if (permissionRequest) {
+      permissionRequest.resolve(false);
+      setPermissionRequest(null);
+    }
+  }, [permissionRequest]);
+
   const toolExecutionContext = useMemo(() => {
     return {
       jupyterConnectivity: jupyterConnectivity,
       imageUrlsNeedToBeUser: true,
+      requestPermission: handleRequestPermission,
     };
-  }, [jupyterConnectivity]);
+  }, [jupyterConnectivity, handleRequestPermission]);
   const {
     chat,
     submitUserMessage,
@@ -550,37 +581,6 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
             </div>
           ) : (
             <>
-              {preferences.requiresJupyter && (
-                <div
-                  style={{
-                    padding: "8px 12px",
-                    margin: "10px 20px",
-                    backgroundColor:
-                      jupyterConnectivity.jupyterServerIsAvailable
-                        ? "#f0f9f4"
-                        : "#fef5f5",
-                    border: jupyterConnectivity.jupyterServerIsAvailable
-                      ? "1px solid #c6e8d5"
-                      : "1px solid #f5c6cb",
-                    borderRadius: "4px",
-                    color: jupyterConnectivity.jupyterServerIsAvailable
-                      ? "#2d5f3f"
-                      : "#7a3e3e",
-                    fontSize: "0.85rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {jupyterConnectivity.jupyterServerIsAvailable ? (
-                    <>Jupyter server connected</>
-                  ) : (
-                    <>
-                      Jupyter server not connected. The assistant cannot execute
-                      Python code until a connection is established. Use the ⚙️
-                      settings button below to configure.
-                    </>
-                  )}
-                </div>
-              )}
               {allMessagesIncludingPartialResponse.map((xx, index) => (
                 <MessageItem
                   key={index}
@@ -594,6 +594,14 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                   onDeleteMessage={handleDeleteMessage}
                 />
               ))}
+
+              {permissionRequest && (
+                <ToolPermissionPrompt
+                  toolName={permissionRequest.toolName}
+                  onAllow={handleAllowPermission}
+                  onDeny={handleDenyPermission}
+                />
+              )}
 
               {responding && !partialResponse && (
                 <div className="message message-assistant">

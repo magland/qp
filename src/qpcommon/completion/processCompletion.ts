@@ -101,6 +101,25 @@ const processCompletion = async (
       if (!tool) {
         throw new Error("Tool not found: " + functionName);
       }
+
+      // Check if permission is required
+      if (tool.requiresPermission && toolExecutionContext.requestPermission) {
+        const toolDescription = tool.toolFunction.description || "";
+        const granted = await toolExecutionContext.requestPermission(
+          functionName,
+          toolDescription,
+        );
+        if (!granted) {
+          ret.push({
+            role: "tool",
+            content: "User canceled execution.",
+            tool_call_id: toolCallId,
+          });
+          onPartialResponse([...ret]);
+          continue;
+        }
+      }
+
       const { result, newMessages } = await tool.execute(
         functionArgsParsed,
         toolExecutionContext,
