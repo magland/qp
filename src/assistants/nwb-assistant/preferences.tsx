@@ -11,9 +11,10 @@ const AssistantDisplayInfo = () => (
 );
 
 const preferences: Preferences = {
-  assistantSystemPrompt: nwbAssistantSystemPrompt,
+  getAssistantSystemPrompt: async () => nwbAssistantSystemPrompt,
   assistantDisplayInfo: <AssistantDisplayInfo />,
   suggestedPrompts: [],
+  requiresJupyter: true,
 };
 
 export default preferences;

@@ -13,9 +13,10 @@ type MainWindowProps = {
 };
 
 export type Preferences = {
-  assistantSystemPrompt: string;
+  getAssistantSystemPrompt: () => Promise<string>;
   assistantDisplayInfo: any;
   suggestedPrompts: string[];
+  requiresJupyter: boolean;
 };
 
 const MainWindow: FunctionComponent<MainWindowProps> = ({
@@ -60,7 +61,10 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({
       <Route
         path="/chat"
         element={
-          <JupyterConnectivityProvider mode="jupyter-server">
+          <JupyterConnectivityProvider
+            mode="jupyter-server"
+            disabled={!preferences.requiresJupyter}
+          >
             <ChatPage
               key="new-chat" // Force remount when switching to new chat
               width={windowDimensions.width}
@@ -75,7 +79,10 @@ const MainWindow: FunctionComponent<MainWindowProps> = ({
       <Route
         path="/chat/:chatId"
         element={
-          <JupyterConnectivityProvider mode="jupyter-server">
+          <JupyterConnectivityProvider
+            mode="jupyter-server"
+            disabled={!preferences.requiresJupyter}
+          >
             <ChatPage
               key={chatId} // Force remount when switching chats
               width={windowDimensions.width}

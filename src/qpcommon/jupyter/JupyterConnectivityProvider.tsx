@@ -73,9 +73,10 @@ const saveServerConfigToLocalStorage = (config: JupyterServerConfig) => {
 export const JupyterConnectivityProvider: FunctionComponent<
   PropsWithChildren<{
     mode: "jupyter-server" | "jupyterlab-extension";
+    disabled?: boolean;
     extensionKernel?: any;
   }>
-> = ({ children, mode, extensionKernel }) => {
+> = ({ children, mode, disabled, extensionKernel }) => {
   const [jupyterServerUrl, setJupyterServerUrl] = useState("");
   const [jupyterServerToken, setJupyterServerToken] = useState("");
 
@@ -90,12 +91,18 @@ export const JupyterConnectivityProvider: FunctionComponent<
 
   // Initialize server config on mount
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
     const config = loadServerConfig();
     setServerConfig(config);
-  }, []);
+  }, [disabled]);
 
   // Update jupyterServerUrl and jupyterServerToken when serverConfig changes
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
     if (serverConfig) {
       setJupyterServerUrl(serverConfig.selectedServerUrl);
       setJupyterServerToken(
@@ -104,7 +111,7 @@ export const JupyterConnectivityProvider: FunctionComponent<
         )?.token || "",
       );
     }
-  }, [serverConfig]);
+  }, [serverConfig, disabled]);
 
   // Save server config to localStorage when it changes
   useEffect(() => {
@@ -161,8 +168,11 @@ export const JupyterConnectivityProvider: FunctionComponent<
   const [refreshCode, setRefreshCode] = useState(0);
 
   useEffect(() => {
+    if (disabled) {
+      return;
+    }
     check();
-  }, [check, refreshCode]);
+  }, [check, refreshCode, disabled]);
 
   const refreshJupyter = useCallback(() => setRefreshCode((c) => c + 1), []);
 

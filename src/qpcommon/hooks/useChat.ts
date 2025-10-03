@@ -81,8 +81,9 @@ const useChat = (
       setError(null);
       try {
         const tools = toolsForChat;
+        const systemPrompt = await preferences.getAssistantSystemPrompt();
         const initialSystemMessage = await getInitialSystemMessage(
-          preferences.assistantSystemPrompt,
+          systemPrompt,
           chat,
           tools,
         );

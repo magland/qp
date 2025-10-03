@@ -6,9 +6,10 @@ const suggestedPrompts = [
 ];
 
 const preferences: Preferences = {
-  assistantSystemPrompt: testChatAssistantDescription,
+  getAssistantSystemPrompt: async () => testChatAssistantDescription,
   assistantDisplayInfo: "Assistant for testing qp.",
   suggestedPrompts,
+  requiresJupyter: true,
 };
 
 export default preferences;

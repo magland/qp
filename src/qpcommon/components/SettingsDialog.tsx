@@ -6,13 +6,16 @@ import {
   maskApiKey,
 } from "../utils/apiKeyStorage";
 import JupyterConfigurationView from "../jupyter/JupyterConfigurationView";
+import { Preferences } from "../MainWindow";
 
 interface SettingsDialogProps {
+  preferences: Preferences;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const SettingsDialog: FunctionComponent<SettingsDialogProps> = ({
+  preferences,
   isOpen,
   onClose,
 }) => {
@@ -207,7 +210,7 @@ const SettingsDialog: FunctionComponent<SettingsDialogProps> = ({
             </button>
           </div>
         </div>
-        <JupyterConfigurationView />
+        {preferences.requiresJupyter && <JupyterConfigurationView />}
       </div>
     </div>
   );

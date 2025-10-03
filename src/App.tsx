@@ -7,6 +7,7 @@ import stanAssistantPreferences from "./assistants/stan-assistant/preferences";
 import neurosiftChatPreferences from "./assistants/neurosift-chat/preferences";
 import nwbAssistantPreferences from "./assistants/nwb-assistant/preferences";
 import testChatPreferences from "./assistants/test-chat/preferences";
+import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferences";
 
 function App() {
   const preferences = useMemo(() => {
@@ -19,11 +20,14 @@ function App() {
       return neurosiftChatPreferences;
     } else if (appName === "test-chat") {
       return testChatPreferences;
+    } else if (appName === "dandiset-explorer") {
+      return dandisetExplorerPreferences;
     } else {
       return {
-        assistantSystemPrompt: "Unknown assistant",
+        getAssistantSystemPrompt: async () => "Unknown assistant",
         assistantDisplayInfo: "Unknown assistant",
         suggestedPrompts: [],
+        requiresJupyter: false,
       };
     }
   }, []);

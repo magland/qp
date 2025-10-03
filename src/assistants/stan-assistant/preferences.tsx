@@ -48,13 +48,14 @@ const AssistantDisplayInfo = () => {
 };
 
 const preferences: Preferences = {
-  assistantSystemPrompt: stanAssistantSystemPrompt,
+  getAssistantSystemPrompt: async () => stanAssistantSystemPrompt,
   assistantDisplayInfo: <AssistantDisplayInfo />,
   suggestedPrompts: [
     "Give an overview of Stan's modeling language.",
     "Provide an example Stan model for linear regression.",
     "Provide an interactive example using Stan Playground.",
   ],
+  requiresJupyter: false,
 };
 
 export default preferences;

@@ -12,6 +12,7 @@ for (const appName of [
   "nwb-assistant",
   "neurosift-chat",
   "test-chat",
+  "dandiset-explorer",
 ]) {
   allowedOrigins.push(`https://${appName}.vercel.app`);
   allowedOrigins.push(`http://${appName}.localhost:3000`);

@@ -30,6 +30,8 @@ export async function POST(request: Request) {
       prefix = "nwb_";
     } else if (chat.app === "neurosift-chat") {
       prefix = "ns_";
+    } else if (chat.app === "dandiset-explorer") {
+      prefix = "de_";
     } else if (chat.app === "test-chat") {
       prefix = "tc_";
     }

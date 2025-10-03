@@ -655,6 +655,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
       </div>
 
       <SettingsDialog
+        preferences={preferences}
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
       />
