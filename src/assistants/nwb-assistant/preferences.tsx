@@ -16,7 +16,7 @@ const preferences: Preferences = {
   suggestedPrompts: [
     "Tell me about Neurodata Without Borders (NWB)",
     "How do I create an NWB file using PyNWB?"
-  ]
+  ],
   requiresJupyter: true,
 };
 
