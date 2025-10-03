@@ -13,7 +13,10 @@ const AssistantDisplayInfo = () => (
 const preferences: Preferences = {
   getAssistantSystemPrompt: async () => nwbAssistantSystemPrompt,
   assistantDisplayInfo: <AssistantDisplayInfo />,
-  suggestedPrompts: [],
+  suggestedPrompts: [
+    "Tell me about Neurodata Without Borders (NWB)",
+    "How do I create an NWB file using PyNWB?"
+  ]
   requiresJupyter: true,
 };
 
