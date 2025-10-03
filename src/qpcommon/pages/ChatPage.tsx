@@ -526,14 +526,14 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                 margin: "10px 20px",
                 backgroundColor: jupyterConnectivity.jupyterServerIsAvailable
                   ? "#f0f9f4"
-                  : "#fef5f5",
+                  : "#fff4e5",
                 border: jupyterConnectivity.jupyterServerIsAvailable
                   ? "1px solid #c6e8d5"
-                  : "1px solid #f5c6cb",
+                  : "1px solid #ffe0b2",
                 borderRadius: "4px",
                 color: jupyterConnectivity.jupyterServerIsAvailable
                   ? "#2d5f3f"
-                  : "#7a3e3e",
+                  : "#663c00",
                 fontSize: "0.85rem",
                 textAlign: "center",
               }}
@@ -542,9 +542,9 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                 <>Jupyter server connected</>
               ) : (
                 <>
-                  Jupyter server not connected. The assistant cannot execute
-                  Python code until a connection is established. Use the ⚙️
-                  settings button below to configure.
+                  Jupyter server not connected. You can still chat with the assistant,
+                  but Python code execution will not be available until a connection is established.
+                  Use the ⚙️ settings button below to configure.
                 </>
               )}
             </div>
