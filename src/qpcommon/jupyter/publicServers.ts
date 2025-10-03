@@ -10,9 +10,9 @@ export const publicServers: PublicServer[] = [
     url: "https://jupyter1.nbfiddle.org",
     description: "Public server 1",
   },
-  {
-    name: "jupyter1",
-    url: "https://hub.dandiarchive.org/user/magland",
-    description: "Public server 1",
-  },
+  // {
+  //   name: "jupyter1",
+  //   url: "https://hub.dandiarchive.org/user/magland",
+  //   description: "Public server 1",
+  // },
 ];
