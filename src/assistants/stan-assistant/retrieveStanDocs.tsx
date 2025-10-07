@@ -3,7 +3,7 @@ import { ORToolCall } from "../../qpcommon/completion/openRouterTypes";
 import { ChatMessage, QPFunctionDescription } from "../../qpcommon/types";
 
 export const toolFunction: QPFunctionDescription = {
-  name: "retrieve_docs",
+  name: "retrieve_stan_docs",
   description: "Retrieve content from a list of documents.",
   parameters: {
     type: "object",
@@ -473,7 +473,7 @@ export const execute = async (
 
     return { result: JSON.stringify(results, null, 2) };
   } catch (error) {
-    console.warn("Error in retrieve_docs:", error);
+    console.warn("Error in retrieve_stan_docs:", error);
     return { result: error instanceof Error ? error.message : "Unknown error" };
   }
 };

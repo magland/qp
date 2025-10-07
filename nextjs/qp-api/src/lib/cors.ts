@@ -13,6 +13,7 @@ for (const appName of [
   "neurosift-chat",
   "test-chat",
   "dandiset-explorer",
+  "figpack-assistant",
 ]) {
   allowedOrigins.push(`https://${appName}.vercel.app`);
   allowedOrigins.push(`http://${appName}.localhost:3000`);

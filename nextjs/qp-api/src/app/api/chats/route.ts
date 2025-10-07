@@ -32,6 +32,8 @@ export async function POST(request: Request) {
       prefix = "ns_";
     } else if (chat.app === "dandiset-explorer") {
       prefix = "de_";
+    } else if (chat.app === "figpack-assistant") {
+      prefix = "fa_";
     } else if (chat.app === "test-chat") {
       prefix = "tc_";
     }

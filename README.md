@@ -7,19 +7,28 @@ A multi-tenant AI chat platform that hosts specialized AI assistants, each acces
 This repository supports five specialized chat applications:
 
 ### 1. **stan-assistant**
+
 Technical assistant for [Stan](https://mc-stan.org/) probabilistic programming. Provides guidance and code examples based on the Stan User's Guide and Reference Manual.
 
 ### 2. **nwb-assistant**
+
 Assistant for [Neurodata Without Borders (NWB)](https://www.nwb.org/). Helps with PyNWB and related tools. Includes Jupyter integration for running Python code.
 
 ### 3. **neurosift-chat**
+
 Explores and queries neuroscience datasets across DANDI Archive, OpenNeuro, and EBRAINS repositories. Features dataset search, NWB file analysis, and data visualization capabilities.
 
 ### 4. **dandiset-explorer**
+
 Specialized assistant for exploring specific Dandisets with Python/Jupyter integration.
 
 ### 5. **test-chat**
+
 Development testing assistant with Jupyter support.
+
+### 6. **figpack-assistant**
+
+Assistant for [Figpack](https://figpack.io/).
 
 ## Architecture
 
@@ -41,3 +50,4 @@ npm run dev
 cd nextjs/qp-api
 npm install
 npm run dev
+```

@@ -8,6 +8,7 @@ import neurosiftChatPreferences from "./assistants/neurosift-chat/preferences";
 import nwbAssistantPreferences from "./assistants/nwb-assistant/preferences";
 import testChatPreferences from "./assistants/test-chat/preferences";
 import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferences";
+import figpackAssistantPreferences from "./assistants/figpack-assistant/preferences";
 
 function App() {
   const preferences = useMemo(() => {
@@ -22,6 +23,8 @@ function App() {
       return testChatPreferences;
     } else if (appName === "dandiset-explorer") {
       return dandisetExplorerPreferences;
+    } else if (appName === "figpack-assistant") {
+      return figpackAssistantPreferences;
     } else {
       return {
         getAssistantSystemPrompt: async () => "Unknown assistant",
