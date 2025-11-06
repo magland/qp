@@ -28,7 +28,7 @@ Development testing assistant with Jupyter support.
 
 ### 6. **figpack-assistant**
 
-Assistant for [Figpack](https://figpack.io/).
+Assistant for [Figpack](https://flatironinstitute.github.io/figpack/).
 
 ## Architecture
 
