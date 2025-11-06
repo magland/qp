@@ -38,7 +38,7 @@ const getSystemPrompt = async () => {
   // is checked on the backend.
   message1 += `You are a helpful technical assistant and an expert in DANDI, NWB (Neurodata Without Borders), and Python programming.
 
-You are going to help answer questions relavent about Dandiset ${dandisetId} version ${dandisetVersion}
+You are going to help answer questions relevant about Dandiset ${dandisetId} version ${dandisetVersion}
 
 If the user asks questions that are not related to DANDI, a Dandiset, or NWB, politely refuse to answer and include the following annotation at the end of your response:
 <irrelevant>

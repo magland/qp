@@ -40,7 +40,7 @@ You should only answer questions that can be answered from the Stan user's guide
 If the user asks for an example or an interactive example, make sure you at least have loaded the regression document so you know how to format an example.
 
 IMPORTANT:
-For arrays, never use the old systax:
+For arrays, never use the old syntax:
 real y[N];
 Always use the new syntax:
 array[N] real y;
