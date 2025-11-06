@@ -8,6 +8,7 @@ import getNwbAssistantTools from "../assistants/nwb-assistant/getTools";
 import getNeurosiftChatTools from "../assistants/neurosift-chat/getTools";
 import getDandisetExplorerTools from "../assistants/dandiset-explorer/getTools";
 import getFigpackAssistantTools from "../assistants/figpack-assistant/getTools";
+import getBidsAssistantTools from "../assistants/bids-assistant/getTools";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTools = async (_chat: Chat): Promise<QPTool[]> => {
@@ -24,6 +25,8 @@ const getTools = async (_chat: Chat): Promise<QPTool[]> => {
     return getDandisetExplorerTools();
   } else if (appName === "figpack-assistant") {
     return getFigpackAssistantTools();
+  } else if (appName === "bids-assistant") {
+    return getBidsAssistantTools();
   } else {
     return Promise.resolve([]);
   }

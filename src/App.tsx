@@ -9,6 +9,7 @@ import nwbAssistantPreferences from "./assistants/nwb-assistant/preferences";
 import testChatPreferences from "./assistants/test-chat/preferences";
 import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferences";
 import figpackAssistantPreferences from "./assistants/figpack-assistant/preferences";
+import bidsAssistantPreferences from "./assistants/bids-assistant/preferences";
 
 function App() {
   const preferences = useMemo(() => {
@@ -25,6 +26,8 @@ function App() {
       return dandisetExplorerPreferences;
     } else if (appName === "figpack-assistant") {
       return figpackAssistantPreferences;
+    } else if (appName === "bids-assistant") {
+      return bidsAssistantPreferences;
     } else {
       return {
         getAssistantSystemPrompt: async () => "Unknown assistant",

@@ -34,6 +34,8 @@ export async function POST(request: Request) {
       prefix = "de_";
     } else if (chat.app === "figpack-assistant") {
       prefix = "fa_";
+    } else if (chat.app === "bids-assistant") {
+      prefix = "ba_";
     } else if (chat.app === "test-chat") {
       prefix = "tc_";
     }
