@@ -4,7 +4,7 @@ A multi-tenant AI chat platform that hosts specialized AI assistants, each acces
 
 ## Chat Assistants
 
-This repository supports five specialized chat applications:
+This repository supports seven specialized chat applications:
 
 ### 1. **stan-assistant**
 
@@ -29,6 +29,10 @@ Development testing assistant with Jupyter support.
 ### 6. **figpack-assistant**
 
 Assistant for [Figpack](https://flatironinstitute.github.io/figpack/).
+
+### 7. **bids-assistant**
+
+Assistant for the [Brain Imaging Data Structure (BIDS)](https://bids.neuroimaging.io/) specification. Helps with organizing neuroimaging data according to BIDS standards.
 
 ## Architecture
 
