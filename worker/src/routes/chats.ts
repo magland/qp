@@ -11,6 +11,13 @@ import {
   listChatsFromDb,
   deleteChatFromDb,
 } from '../services/db';
+import { checkRateLimit, createRateLimitResponse } from '../utils/rateLimiter';
+import {
+  validateRequestSize,
+  validateChatSize,
+  createSizeErrorResponse,
+  SIZE_LIMITS,
+} from '../utils/sizeValidation';
 
 // POST /api/chats - Create new chat
 export async function handleCreateChat(
@@ -18,7 +25,38 @@ export async function handleCreateChat(
   env: Env
 ): Promise<Response> {
   try {
-    const body = await request.json();
+    // Check rate limit
+    const rateLimit = await checkRateLimit(request, env, 'chatOps');
+    if (!rateLimit.allowed) {
+      const response = createRateLimitResponse(
+        rateLimit.retryAfter!,
+        rateLimit.reason!
+      );
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    // Validate request size (chat operations can be larger)
+    const sizeCheck = await validateRequestSize(request, SIZE_LIMITS.chatRequest);
+    if (!sizeCheck.valid) {
+      const response = createSizeErrorResponse(sizeCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    const body = JSON.parse(sizeCheck.body!);
     
     if (!body.chat || !validateChat(body.chat)) {
       return new Response(
@@ -34,6 +72,20 @@ export async function handleCreateChat(
     }
     
     const chat: Chat = body.chat;
+    
+    // Validate chat size
+    const chatSizeCheck = validateChatSize(chat);
+    if (!chatSizeCheck.valid) {
+      const response = createSizeErrorResponse(chatSizeCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
     
     // Generate chatId if not provided
     if (!chat.chatId || chat.chatId === '') {
@@ -54,10 +106,12 @@ export async function handleCreateChat(
     );
   } catch (error) {
     console.error('Error creating chat:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const statusCode = errorMessage.includes('limit exceeded') ? 400 : 500;
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: errorMessage }),
       { 
-        status: 500, 
+        status: statusCode, 
         headers: { 
           'Content-Type': 'application/json',
           ...getCorsHeaders(request)
@@ -74,6 +128,23 @@ export async function handleGetChat(
   chatId: string
 ): Promise<Response> {
   try {
+    // Check rate limit
+    const rateLimit = await checkRateLimit(request, env, 'chatOps');
+    if (!rateLimit.allowed) {
+      const response = createRateLimitResponse(
+        rateLimit.retryAfter!,
+        rateLimit.reason!
+      );
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
     const chat = await getChatFromDb(env, chatId);
     
     if (!chat) {
@@ -121,7 +192,38 @@ export async function handleUpdateChat(
   chatId: string
 ): Promise<Response> {
   try {
-    const body = await request.json();
+    // Check rate limit
+    const rateLimit = await checkRateLimit(request, env, 'chatOps');
+    if (!rateLimit.allowed) {
+      const response = createRateLimitResponse(
+        rateLimit.retryAfter!,
+        rateLimit.reason!
+      );
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    // Validate request size (chat operations can be larger)
+    const sizeCheck = await validateRequestSize(request, SIZE_LIMITS.chatRequest);
+    if (!sizeCheck.valid) {
+      const response = createSizeErrorResponse(sizeCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    const body = JSON.parse(sizeCheck.body!);
     
     if (!body.chat || !validateChat(body.chat)) {
       return new Response(
@@ -137,6 +239,20 @@ export async function handleUpdateChat(
     }
     
     const chat: Chat = body.chat;
+    
+    // Validate chat size
+    const chatSizeCheck = validateChatSize(chat);
+    if (!chatSizeCheck.valid) {
+      const response = createSizeErrorResponse(chatSizeCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
     
     // Ensure chatId matches
     if (chat.chatId !== chatId) {

@@ -2,11 +2,22 @@
 
 import { Env, Chat, ChatRow } from '../types';
 import { getChatContent, saveChatContent, deleteChatContent } from './storage';
+import { MAX_CHATS_PER_APP } from '../utils/sizeValidation';
 
 export async function createChatInDb(
   env: Env,
   chat: Chat
 ): Promise<string> {
+  // Check chat count limit for this app
+  const countResult = await env.DB.prepare(`
+    SELECT COUNT(*) as count FROM chats WHERE app = ?
+  `).bind(chat.app).first<{ count: number }>();
+  
+  const currentCount = countResult?.count || 0;
+  if (currentCount >= MAX_CHATS_PER_APP) {
+    throw new Error(`Chat limit exceeded for app ${chat.app}. Maximum ${MAX_CHATS_PER_APP} chats allowed.`);
+  }
+  
   const now = new Date().toISOString();
   
   // Save messages to R2

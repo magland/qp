@@ -16,3 +16,8 @@ database_id = "64eac6da-750c-4600-951d-cab8a0d16686"
 [[r2_buckets]]
 binding = "CHAT_STORAGE"
 bucket_name = "qp-chat-storage"
+
+# KV Namespace binding for rate limiting
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "6fe4bb582f484fb68b1fec987b9ec71e"

@@ -3,6 +3,13 @@
 import { Env, CompletionRequest } from '../types';
 import { getCorsHeaders } from '../utils/cors';
 import { validateCompletionRequest } from '../utils/validation';
+import { checkRateLimit, createRateLimitResponse } from '../utils/rateLimiter';
+import {
+  validateRequestSize,
+  validateCompletionContent,
+  createSizeErrorResponse,
+  SIZE_LIMITS,
+} from '../utils/sizeValidation';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
@@ -23,7 +30,38 @@ export async function handleCompletion(
   env: Env
 ): Promise<Response> {
   try {
-    const body: CompletionRequest = await request.json();
+    // Check rate limit
+    const rateLimit = await checkRateLimit(request, env, 'completion');
+    if (!rateLimit.allowed) {
+      const response = createRateLimitResponse(
+        rateLimit.retryAfter!,
+        rateLimit.reason!
+      );
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    // Validate request size
+    const sizeCheck = await validateRequestSize(request, SIZE_LIMITS.defaultRequest);
+    if (!sizeCheck.valid) {
+      const response = createSizeErrorResponse(sizeCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
+    }
+    
+    const body: CompletionRequest = JSON.parse(sizeCheck.body!);
     
     if (!validateCompletionRequest(body)) {
       return new Response(
@@ -36,6 +74,20 @@ export async function handleCompletion(
           },
         }
       );
+    }
+    
+    // Validate content size
+    const contentCheck = validateCompletionContent(body);
+    if (!contentCheck.valid) {
+      const response = createSizeErrorResponse(contentCheck.error!);
+      const headers = new Headers(response.headers);
+      Object.entries(getCorsHeaders(request)).forEach(([key, value]) => {
+        headers.set(key, value as string);
+      });
+      return new Response(response.body, {
+        status: response.status,
+        headers,
+      });
     }
     
     const userKey = request.headers.get('x-openrouter-key');
