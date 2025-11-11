@@ -3,6 +3,7 @@
 export interface Env {
   DB: D1Database;
   CHAT_STORAGE: R2Bucket;
+  RATE_LIMIT_KV: KVNamespace;
   OPENROUTER_API_KEY: string;
   ADMIN_KEY: string;
 }
