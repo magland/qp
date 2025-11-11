@@ -17,21 +17,13 @@ const AssistantMessageItem: FunctionComponent<{
   allToolMessages,
   tools,
   inProgress,
-  chatId,
   onFeedbackUpdate,
 }) => {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState(
     message.feedback?.comment || "",
   );
-  const [showPublicChatMessage, setShowPublicChatMessage] = useState(false);
-
   const handleThumbClick = (thumbType: "up" | "down") => {
-    if (!chatId) {
-      setShowPublicChatMessage(true);
-      return;
-    }
-
     const currentThumb = message.feedback?.thumbs;
 
     if (currentThumb === thumbType) {
@@ -164,38 +156,6 @@ const AssistantMessageItem: FunctionComponent<{
               </button>
             )}
           </div>
-
-          {/* Message for non-public chats */}
-          {showPublicChatMessage && (
-            <div
-              style={{
-                marginTop: "8px",
-                padding: "8px 12px",
-                backgroundColor: "#fff3cd",
-                border: "1px solid #ffc107",
-                borderRadius: "4px",
-                fontSize: "0.85rem",
-                color: "#856404",
-              }}
-            >
-              Please make this chat public to provide feedback. We appreciate
-              and encourage your feedback!
-              <button
-                onClick={() => setShowPublicChatMessage(false)}
-                style={{
-                  marginLeft: "8px",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "0.85rem",
-                  textDecoration: "underline",
-                  color: "#856404",
-                }}
-              >
-                Dismiss
-              </button>
-            </div>
-          )}
 
           {/* Comment input */}
           {showCommentInput && (

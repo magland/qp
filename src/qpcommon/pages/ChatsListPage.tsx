@@ -1,5 +1,5 @@
 import { FunctionComponent, useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Chat } from "../types";
 import { listChats, deleteChat } from "../interface/interface";
 import getAppName from "../getAppName";
@@ -16,7 +16,10 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null);
   const [adminKey, setAdminKey] = useState<string>("");
   const [showAdminKeyInput, setShowAdminKeyInput] = useState<boolean>(false);
+  const [showAdminKeySettings, setShowAdminKeySettings] = useState<boolean>(false);
+  const [tempAdminKey, setTempAdminKey] = useState<string>("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const loadChats = useCallback(async () => {
     try {
@@ -25,7 +28,14 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
       const fetchedChats = await listChats(getAppName());
       setChats(fetchedChats);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load chats");
+      const errorMessage = err instanceof Error ? err.message : "Failed to load chats";
+      setError(errorMessage);
+      // If unauthorized, prompt for admin key
+      if (errorMessage.includes("Unauthorized") || errorMessage.includes("401")) {
+        setShowAdminKeySettings(true);
+        const savedKey = localStorage.getItem("qp-admin-key") || "";
+        setTempAdminKey(savedKey);
+      }
     } finally {
       setLoading(false);
     }
@@ -73,14 +83,37 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
 
   const handleChatClick = useCallback(
     (chatId: string) => {
-      navigate(`/chat/${chatId}`);
+      navigate(`/chat/${chatId}${location.search}`);
     },
-    [navigate],
+    [navigate, location.search],
   );
 
   const handleNewChat = useCallback(() => {
-    navigate("/chat");
-  }, [navigate]);
+    navigate(`/chat${location.search}`);
+  }, [navigate, location.search]);
+
+  const handleOpenAdminKeySettings = useCallback(() => {
+    const savedKey = localStorage.getItem("qp-admin-key") || "";
+    setTempAdminKey(savedKey);
+    setShowAdminKeySettings(true);
+  }, []);
+
+  const handleCloseAdminKeySettings = useCallback(() => {
+    setShowAdminKeySettings(false);
+    setTempAdminKey("");
+  }, []);
+
+  const handleSaveAdminKey = useCallback(async () => {
+    if (tempAdminKey.trim()) {
+      localStorage.setItem("qp-admin-key", tempAdminKey.trim());
+    } else {
+      localStorage.removeItem("qp-admin-key");
+    }
+    setShowAdminKeySettings(false);
+    setTempAdminKey("");
+    // Reload chats with the new key
+    await loadChats();
+  }, [tempAdminKey, loadChats]);
 
   const formatDate = (date?: Date) => {
     if (!date) return "Unknown";
@@ -110,9 +143,14 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
     <div className="chats-list-container">
       <div className="chats-list-header">
         <h1>All Chats</h1>
-        <button onClick={handleNewChat} className="new-chat-button">
-          + New Chat
-        </button>
+        <div className="header-buttons">
+          <button onClick={handleOpenAdminKeySettings} className="settings-button" title="Admin Key Settings">
+            🔑
+          </button>
+          <button onClick={handleNewChat} className="new-chat-button">
+            + New Chat
+          </button>
+        </div>
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -194,6 +232,44 @@ const ChatsListPage: FunctionComponent<ChatsListPageProps> = () => {
                 disabled={!adminKey.trim()}
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAdminKeySettings && (
+        <div className="modal-overlay" onClick={handleCloseAdminKeySettings}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Admin Key Settings</h2>
+            <p>Set or update your admin key to manage chats:</p>
+            <input
+              type="password"
+              value={tempAdminKey}
+              onChange={(e) => setTempAdminKey(e.target.value)}
+              placeholder="Enter admin key"
+              className="admin-key-input"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSaveAdminKey();
+                } else if (e.key === "Escape") {
+                  handleCloseAdminKeySettings();
+                }
+              }}
+            />
+            <p className="help-text">
+              This key is required to list and delete chats. It will be stored in your browser.
+            </p>
+            <div className="modal-buttons">
+              <button onClick={handleCloseAdminKeySettings} className="cancel-button">
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAdminKey}
+                className="confirm-delete-button"
+              >
+                Save
               </button>
             </div>
           </div>

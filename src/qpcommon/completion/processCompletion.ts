@@ -41,7 +41,7 @@ const processCompletion = async (
     headers["x-openrouter-key"] = apiKey;
   }
 
-  const response = await fetch("https://qp-api-two.vercel.app/api/completion", {
+  const response = await fetch("https://qp-worker.neurosift.app/api/completion", {
     method: "POST",
     headers,
     body: JSON.stringify(request),

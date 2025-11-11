@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { getDocPages, execute, getDetailedDescription } from './retrieveBidsDocs';
+import { describe, expect, it } from 'vitest';
+import { execute, getDetailedDescription, getDocPages } from './retrieveBidsDocs';
 
 describe('BIDS Assistant - retrieveBidsDocs', () => {
   describe('getDocPages', () => {

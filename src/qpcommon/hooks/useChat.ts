@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Preferences } from "../MainWindow";
 import processCompletion from "../completion/processCompletion";
+import { messageContentToString } from "../components/AssistantMessageItem";
 import {
+  ChatAction,
   chatReducer,
   createChatWithContent,
   emptyChat,
@@ -9,25 +11,22 @@ import {
   saveChat,
 } from "../interface/interface";
 import { Chat, ChatMessage, QPTool, ToolExecutionContext } from "../types";
-import { messageContentToString } from "../components/AssistantMessageItem";
 
 const useChat = (
   chatId: string,
+  setChatId: (chatId: string) => void,
   getTools: (chat: Chat) => Promise<QPTool[]>,
   preferences: Preferences,
-  _chatIsPublic: boolean,
   toolExecutionContext: ToolExecutionContext,
 ) => {
-  const isNewChatMode = !chatId || chatId === "";
-  const [chat, chatDispatch] = useReducer(chatReducer, emptyChat);
-  const [loadingChat, setLoadingChat] = useState<boolean>(!isNewChatMode);
+  const [chat, setChat] = useState<Chat>(emptyChat);
+  const [loadingChat, setLoadingChat] = useState<boolean>(!!chatId);
   const [responding, setResponding] = useState<boolean>(false);
   const [partialResponse, setPartialResponse] = useState<ChatMessage[] | null>(
     null,
   );
   const [error, setError] = useState<string | null>(null);
   const [toolsForChat, setToolsForChat] = useState<QPTool[]>([]);
-  const [newChatId, setNewChatId] = useState<string | null>(null);
 
   useEffect(() => {
     let canceled = false;
@@ -49,9 +48,9 @@ const useChat = (
   }, [chat, getTools]);
 
   const loadChat = useCallback(async () => {
-    if (isNewChatMode) {
-      // In new chat mode, don't load from DB - just use empty chat
-      chatDispatch({ type: "set_chat", chat: emptyChat });
+    if (!chatId) {
+      // just use empty chat
+      setChat(emptyChat);
       setLoadingChat(false);
       return;
     }
@@ -65,14 +64,14 @@ const useChat = (
         setLoadingChat(false);
         return;
       }
-      chatDispatch({ type: "set_chat", chat: fetchedChat });
+      setChat(fetchedChat);
       setLoadingChat(false);
       return fetchedChat;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error loading chat");
       setLoadingChat(false);
     }
-  }, [chatId, isNewChatMode]);
+  }, [chatId]);
 
   const generateResponse = useCallback(
     async (chat: Chat) => {
@@ -80,53 +79,45 @@ const useChat = (
       setPartialResponse(null);
       setError(null);
       try {
+        let modifiedChat = chat;
         const tools = toolsForChat;
         const systemPrompt = await preferences.getAssistantSystemPrompt();
         const initialSystemMessage = await getInitialSystemMessage(
           systemPrompt,
-          chat,
+          modifiedChat,
           tools,
         );
         const newMessages = await processCompletion(
-          chat,
+          modifiedChat,
           setPartialResponse,
           tools,
           initialSystemMessage,
           toolExecutionContext,
         );
         for (const newMessage of newMessages) {
-          chatDispatch({ type: "add_message", message: newMessage });
+          modifiedChat = chatReducer(modifiedChat, { type: "add_message", message: newMessage });
+          setChat(modifiedChat);
           if (newMessage.role === "assistant") {
             if (newMessage.usage) {
-              chatDispatch({
-                type: "increment_usage",
-                usage: newMessage.usage,
-              });
+              modifiedChat = chatReducer(modifiedChat, { type: "increment_usage", usage: newMessage.usage });
+              setChat(modifiedChat);
             }
           }
         }
         setPartialResponse(null);
         setResponding(false);
 
-        if (_chatIsPublic) {
-          const assistantMessageHasRedFlag = checkForRedFlags(
-            messageContentToString(newMessages[newMessages.length - 1].content),
-          );
-          if (!assistantMessageHasRedFlag) {
-            // In new chat mode, create the chat in DB for the first time
-            if (isNewChatMode && !newChatId) {
-              const id = await createChatWithContent({
-                ...chat,
-                messages: [...chat.messages, ...newMessages],
-              });
-              setNewChatId(id);
-            } else if (!isNewChatMode) {
-              // For existing chats, just save updates
-              await saveChat({
-                ...chat,
-                messages: [...chat.messages, ...newMessages],
-              });
-            }
+        const assistantMessageHasRedFlag = checkForRedFlags(
+          messageContentToString(newMessages[newMessages.length - 1].content),
+        );
+        if (!assistantMessageHasRedFlag) {
+          // In new chat mode, create the chat in DB for the first time
+          if (!chatId) {
+            const id = await createChatWithContent(modifiedChat);
+            setChatId(id);
+          } else {
+            // For existing chats, just save updates
+            await saveChat(modifiedChat);
           }
         }
       } catch (err) {
@@ -138,13 +129,11 @@ const useChat = (
       }
     },
     [
-      chatDispatch,
+      chatId,
+      setChatId,
       preferences,
       toolsForChat,
       toolExecutionContext,
-      isNewChatMode,
-      newChatId,
-      _chatIsPublic,
     ],
   );
 
@@ -152,7 +141,8 @@ const useChat = (
     async (content: string) => {
       try {
         const userMessage = { role: "user" as const, content };
-        chatDispatch({ type: "add_message", message: userMessage });
+        const modifiedChat = chatReducer(chat, { type: "add_message", message: userMessage });
+        setChat(modifiedChat);
 
         const updatedChat = {
           ...chat,
@@ -160,19 +150,13 @@ const useChat = (
         };
 
         await generateResponse(updatedChat);
-
-        // If in new chat mode and response was successful, save to DB
-        if (isNewChatMode && !error) {
-          // Wait a bit to ensure response has been added to chat state
-          // The chat will be saved automatically by the useEffect watching for assistant messages
-        }
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Error submitting message",
         );
       }
     },
-    [chat, chatDispatch, generateResponse, isNewChatMode, error],
+    [chat, generateResponse],
   );
 
   const generateInitialResponse = useCallback(async () => {
@@ -195,16 +179,25 @@ const useChat = (
   }, [loadChat]);
 
   const setChatModel = useCallback((newModel: string) => {
-    chatDispatch({ type: "set_model", model: newModel });
-  }, []);
+    const modifiedChat = chatReducer(chat, { type: "set_model", model: newModel });
+    setChat(modifiedChat);
+  }, [chat]);
 
   const clearChat = useCallback(() => {
-    chatDispatch({ type: "set_chat", chat: emptyChat });
+    setChat(emptyChat);
     setError(null);
     setPartialResponse(null);
     setResponding(false);
-    setNewChatId(null);
-  }, []);
+    setChatId("");
+  }, [setChatId]);
+
+  const chatDispatch = useCallback(
+    (action: ChatAction) => {
+      const modifiedChat = chatReducer(chat, action);
+      setChat(modifiedChat);
+    },
+    [chat],
+  );
 
   return {
     chat,
@@ -216,10 +209,8 @@ const useChat = (
     setChatModel,
     error,
     toolsForChat,
-    newChatId,
-    isNewChatMode,
     clearChat,
-    chatDispatch,
+    chatDispatch
   };
 };
 

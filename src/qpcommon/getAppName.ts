@@ -2,8 +2,14 @@ const getAppName = (): string => {
   // get the app name from the URL. So for example https://stan-assistant.vercel.app would return "stan-assistant"
   // and http://stan-assistant.localhost:3000 would return "stan-assistant"
   // and https://chat.neurosift.app would return "neurosift-chat"
+  // and http://some-domain/?app="stan-assistant" would return "stan-assistant"
   if (typeof window === "undefined") {
     return "unknown-app";
+  }
+  const urlParams = new URLSearchParams(window.location.search);
+  const appParam = urlParams.get("app");
+  if (appParam) {
+    return appParam;
   }
   if (window.location.hostname === "chat.neurosift.app") {
     return "neurosift-chat";

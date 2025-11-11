@@ -1,0 +1,39 @@
+// CORS utilities
+
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  /^https:\/\/.*\.neurosift\.app$/
+];
+
+export function isOriginAllowed(origin: string | null): boolean {
+  if (!origin) return false;
+  
+  return ALLOWED_ORIGINS.some(allowed => {
+    if (typeof allowed === 'string') {
+      return origin === allowed;
+    }
+    return allowed.test(origin);
+  });
+}
+
+export function getCorsHeaders(request: Request): HeadersInit {
+  const origin = request.headers.get('Origin');
+  const headers: HeadersInit = {
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, x-openrouter-key, x-admin-key',
+    'Access-Control-Max-Age': '86400',
+  };
+
+  if (origin && isOriginAllowed(origin)) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+
+  return headers;
+}
+
+export function handleOptions(request: Request): Response {
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(request),
+  });
+}

@@ -1,7 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
+import { describe, expect, it } from 'vitest';
 
 describe('BIDS Assistant - Integration', () => {
   describe('File Structure', () => {

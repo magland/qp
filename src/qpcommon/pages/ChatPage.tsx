@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import {
   FunctionComponent,
   useCallback,
@@ -6,23 +7,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Preferences } from "../MainWindow";
 import { CHEAP_MODELS } from "../completion/cheapModels";
 import AssistantMessageItem, {
   messageContentToString,
 } from "../components/AssistantMessageItem";
 import ChatInput from "../components/ChatInput";
+import MarkdownContent from "../components/MarkdownContent";
 import SettingsDialog from "../components/SettingsDialog";
+import ToolPermissionPrompt from "../components/ToolPermissionPrompt";
 import UsageDisplay from "../components/UsageDisplay";
 import useChat from "../hooks/useChat";
+import { saveChat } from "../interface/interface";
+import { useJupyterConnectivity } from "../jupyter/JupyterConnectivity";
 import { Chat, ChatMessage, QPTool } from "../types";
 import { getStoredApiKey } from "../utils/apiKeyStorage";
-import { saveChat, createChatWithContent } from "../interface/interface";
-import { useJupyterConnectivity } from "../jupyter/JupyterConnectivity";
-import MarkdownContent from "../components/MarkdownContent";
-import { Box } from "@mui/material";
-import ToolPermissionPrompt from "../components/ToolPermissionPrompt";
 
 interface ChatPageProps {
   width: number;
@@ -33,16 +33,16 @@ interface ChatPageProps {
 }
 
 const ChatPage: FunctionComponent<ChatPageProps> = ({
-  chatId,
+  chatId: chatIdProp,
   width,
   height,
   getTools,
   preferences,
 }) => {
+  const [newChatId, setNewChatId] = useState<string | undefined>(undefined);
+  const chatId = newChatId !== undefined ? newChatId : chatIdProp;
   const navigate = useNavigate();
-  const [chatIsPublic, setChatIsPublic] = useState<boolean>(!!chatId);
-  const [showPublicInfo, setShowPublicInfo] = useState<boolean>(false);
-  const previousChatIsPublic = useRef<boolean>(!!chatId);
+  const location = useLocation();
   const jupyterConnectivity = useJupyterConnectivity();
   const [permissionRequest, setPermissionRequest] = useState<{
     toolName: string;
@@ -73,6 +73,10 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
     }
   }, [permissionRequest]);
 
+  const setChatId = useCallback((newChatId: string) => {
+    setNewChatId(newChatId);
+  }, []);
+
   const toolExecutionContext = useMemo(() => {
     return {
       jupyterConnectivity: jupyterConnectivity,
@@ -90,15 +94,13 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
     setChatModel,
     error,
     toolsForChat,
-    newChatId,
-    isNewChatMode,
     clearChat,
-    chatDispatch,
+    chatDispatch
   } = useChat(
     chatId,
+    setChatId,
     getTools,
     preferences,
-    chatIsPublic,
     toolExecutionContext,
   );
   const [newPrompt, setNewPrompt] = useState<string>("");
@@ -107,41 +109,6 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
 
   // make sure we never generate the initial response more than once
   const generatedInitialResponse = useRef(false);
-
-  // Save chat when making it public if there are already messages
-  useEffect(() => {
-    if (
-      !previousChatIsPublic.current &&
-      chatIsPublic &&
-      chat &&
-      chat.messages.length > 0
-    ) {
-      // Chat was just made public and has messages - save it
-      if (isNewChatMode && !newChatId) {
-        // Create new chat in DB for the first time
-        createChatWithContent(chat)
-          .then((id: string) => {
-            navigate(`/chat/${id}`);
-          })
-          .catch((err: Error) => {
-            console.error("Error saving chat when making public:", err);
-          });
-      } else if (!isNewChatMode && chatId) {
-        // Update existing chat
-        saveChat(chat).catch((err) => {
-          console.error("Error saving chat when making public:", err);
-        });
-      }
-    }
-    previousChatIsPublic.current = chatIsPublic;
-  }, [chatIsPublic, chat, isNewChatMode, newChatId, chatId, navigate]);
-
-  // Navigate to the new chat once it's created
-  useEffect(() => {
-    if (newChatId) {
-      navigate(`/chat/${newChatId}`);
-    }
-  }, [newChatId, navigate]);
 
   // Check if the current model requires an API key
   const requiresApiKey = useMemo(() => {
@@ -266,11 +233,11 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
 
   const handleNewChat = useCallback(() => {
     if (chatId) {
-      navigate("/chat", { replace: true });
+      navigate(`/chat${location.search}`, { replace: true });
     } else {
       clearChat();
     }
-  }, [navigate, chatId, clearChat]);
+  }, [navigate, location.search, chatId, clearChat]);
 
   const handleFeedbackUpdate = useCallback(
     (
@@ -284,7 +251,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
           feedback,
         });
 
-        // Save to database if chat is public
+        // Save to database
         if (chatId && chat) {
           // Create updated chat with the feedback
           const updatedChat = {
@@ -317,7 +284,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
           messageIndex,
         });
 
-        // Save to database if chat is public
+        // Save to database
         if (chatId && chat) {
           // Create updated chat with messages deleted from index
           const updatedChat = {
@@ -391,15 +358,15 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
             <button
               onClick={handleNewChat}
               className="new-chat-button"
-              disabled={isNewChatMode && chat.messages.length === 0}
+              disabled={chat.messages.length === 0}
               style={{
                 padding: "0.4rem 1rem",
                 fontSize: "0.875rem",
                 borderRadius: "6px",
                 flexShrink: 0,
-                opacity: isNewChatMode && chat.messages.length === 0 ? 0.5 : 1,
+                opacity: chat.messages.length === 0 ? 0.5 : 1,
                 cursor:
-                  isNewChatMode && chat.messages.length === 0
+                  chat.messages.length === 0
                     ? "not-allowed"
                     : "pointer",
               }}
@@ -437,115 +404,20 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
         </div>
 
         <div className="conversation-area" ref={conversationRef}>
-          {chatIsPublic && (
-            <div
-              style={{
-                padding: "12px",
-                margin: "10px 20px",
-                backgroundColor: "#e0f7fa",
-                border: "2px solid #4dd0e1",
-                borderRadius: "4px",
-                color: "#006064",
-                fontWeight: "bold",
-                textAlign: "center",
-              }}
-            >
-              This chat is public. Do not share any personal or sensitive
-              information.
-            </div>
-          )}
-          {!chatIsPublic && (
-            <div
-              style={{
-                padding: "12px",
-                margin: "10px 20px",
-                borderRadius: "4px",
-                backgroundColor: "#f5f5f5",
-                border: "1px solid #ddd",
-                color: "#333",
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  marginBottom: "8px",
-                }}
-              >
-                This chat will not be saved.
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  marginTop: "8px",
-                }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    cursor: responding ? "not-allowed" : "pointer",
-                    fontSize: "0.9rem",
-                    fontWeight: "normal",
-                    opacity: responding ? 0.5 : 1,
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={chatIsPublic}
-                    onChange={(e) => setChatIsPublic(e.target.checked)}
-                    disabled={responding}
-                    style={{ cursor: responding ? "not-allowed" : "pointer" }}
-                  />
-                  Make this chat public
-                </label>
-                <button
-                  onClick={() => setShowPublicInfo(!showPublicInfo)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "1rem",
-                    padding: "0 4px",
-                    color: "#777",
-                  }}
-                  title={showPublicInfo ? "Hide info" : "Show info"}
-                >
-                  {showPublicInfo ? "▼" : "▶"}
-                </button>
-              </div>
-              {showPublicInfo && (
-                <div
-                  style={{
-                    marginTop: "12px",
-                    padding: "10px",
-                    fontSize: "0.85rem",
-                    lineHeight: "1.5",
-                    textAlign: "left",
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #ccc",
-                    borderRadius: "4px",
-                    color: "#555",
-                  }}
-                >
-                  <strong>Why make chats public?</strong>
-                  <p style={{ margin: "8px 0 0 0" }}>
-                    We encourage users to share their conversations publicly.
-                    This helps our development team understand how people are
-                    using the application, what features work well, and where we
-                    can improve.
-                  </p>
-                  <p style={{ margin: "8px 0 0 0", fontStyle: "italic" }}>
-                    Note: Do not share personal or sensitive information.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+          <div
+            style={{
+              padding: "12px",
+              margin: "10px 20px",
+              backgroundColor: "#e0f7fa",
+              border: "2px solid #4dd0e1",
+              borderRadius: "4px",
+              color: "#006064",
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            This conversation is saved for internal development purposes. Do not share personal or sensitive information.
+          </div>
           {preferences.requiresJupyter && (
             <div
               style={{
