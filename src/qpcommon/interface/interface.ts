@@ -1,8 +1,6 @@
 import getAppName from "../getAppName";
 import { Chat, ChatMessage } from "../types";
 
-const API_BASE_URL = "https://qp-api-two.vercel.app/api";
-
 export type ChatAction =
   | {
       type: "add_message";
@@ -98,18 +96,19 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
   }
 };
 
+const API_BASE_URL = "https://qp-worker.neurosift.app";
+
 export const createChatWithContent = async (chat: Chat): Promise<string> => {
-  const response = await fetch(`${API_BASE_URL}/chats`, {
+  const response = await fetch(`${API_BASE_URL}/api/chats`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(chat),
+    body: JSON.stringify({ chat }),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to create chat");
+    throw new Error(`Failed to create chat: ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -117,83 +116,78 @@ export const createChatWithContent = async (chat: Chat): Promise<string> => {
 };
 
 export const getChat = async (chatId: string): Promise<Chat | null> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/chats/${chatId}`);
+  const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (response.status === 404) {
-      return null;
-    }
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to fetch chat");
-    }
-
-    const chat = await response.json();
-
-    // Convert date strings back to Date objects if needed
-    if (chat.createdAt) {
-      chat.createdAt = new Date(chat.createdAt);
-    }
-    if (chat.updatedAt) {
-      chat.updatedAt = new Date(chat.updatedAt);
-    }
-
-    return chat;
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    throw error;
+  if (response.status === 404) {
+    return null;
   }
+
+  if (!response.ok) {
+    throw new Error(`Failed to get chat: ${response.statusText}`);
+  }
+
+  const chat = await response.json();
+  return chat;
 };
 
 export const saveChat = async (chat: Chat): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/chats/${chat.chatId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/chats/${chat.chatId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(chat),
+    body: JSON.stringify({ chat }),
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to save chat");
+    throw new Error(`Failed to save chat: ${response.statusText}`);
   }
 };
 
-export const listChats = async (app: string): Promise<Chat[]> => {
-  const response = await fetch(
-    `${API_BASE_URL}/chats?app=${encodeURIComponent(app)}`,
-  );
+export const listChats = async (app: string, adminKey?: string): Promise<Chat[]> => {
+  // Try provided key, then localStorage, then environment variable (for dev)
+  const key = adminKey || 
+    (typeof localStorage !== 'undefined' ? localStorage.getItem("qp-admin-key") : null) || 
+    import.meta.env.VITE_ADMIN_KEY || 
+    "";
+  
+  const response = await fetch(`${API_BASE_URL}/api/chats?app=${encodeURIComponent(app)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": key,
+    },
+  });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to list chats");
+    if (response.status === 401) {
+      throw new Error("Unauthorized: Invalid or missing admin key");
+    }
+    throw new Error(`Failed to list chats: ${response.statusText}`);
   }
 
   const chats = await response.json();
-
-  // Convert date strings back to Date objects if needed
-  return chats.map((chat: Chat) => ({
-    ...chat,
-    createdAt: chat.createdAt ? new Date(chat.createdAt) : undefined,
-    updatedAt: chat.updatedAt ? new Date(chat.updatedAt) : undefined,
-  }));
+  return chats;
 };
 
 export const deleteChat = async (
   chatId: string,
   adminKey: string,
 ): Promise<void> => {
-  const response = await fetch(`${API_BASE_URL}/chats/${chatId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/chats/${chatId}`, {
     method: "DELETE",
     headers: {
+      "Content-Type": "application/json",
       "x-admin-key": adminKey,
     },
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Failed to delete chat");
+    throw new Error(`Failed to delete chat: ${response.statusText}`);
   }
 };

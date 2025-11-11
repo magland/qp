@@ -1,0 +1,18 @@
+name = "qp-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Environment variables (set these via wrangler secret put or in Cloudflare dashboard)
+# OPENROUTER_API_KEY - for cheap models
+# ADMIN_KEY - for protected operations
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "qp-production-db"
+database_id = "64eac6da-750c-4600-951d-cab8a0d16686"
+
+# R2 Bucket binding
+[[r2_buckets]]
+binding = "CHAT_STORAGE"
+bucket_name = "qp-chat-storage"
