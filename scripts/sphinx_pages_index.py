@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Extract all pages from Sphinx documentation and map them to source files.
+Extract all pages from Sphinx or MkDocs documentation and map them to source files.
 
 Usage:
     sphinx_pages_index.py <docs_url> [options]
 
 Example:
     sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
+    sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/
     sphinx_pages_index.py https://docs.datalad.org/en/stable/ --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source
     sphinx_pages_index.py https://docs.python.org/3/ --validate
 """
@@ -59,25 +60,70 @@ def check_url_exists(url, timeout=10):
             return False
 
 
-def get_all_pages(docs_url, source_repo_url=None, validate=False):
+def detect_doc_type(docs_url):
     """
-    Extract all pages from Sphinx documentation.
-
-    Args:
-        docs_url: Base URL of the Sphinx documentation (e.g., https://docs.datalad.org/en/stable/)
-        source_repo_url: Optional source repository base URL (e.g., GitHub)
-        validate: If True, validate that source URLs are reachable
+    Detect whether documentation is built with Sphinx or MkDocs.
 
     Returns:
-        Dictionary with page information
+        'sphinx', 'mkdocs', or None
     """
+    # Ensure docs_url ends with /
+    if not docs_url.endswith('/'):
+        docs_url += '/'
+
+    # Try Sphinx first (searchindex.js)
+    sphinx_index = urljoin(docs_url, 'searchindex.js')
+    if fetch_url(sphinx_index, timeout=10):
+        return 'sphinx'
+
+    # Try MkDocs (search/search_index.json)
+    mkdocs_index = urljoin(docs_url, 'search/search_index.json')
+    if fetch_url(mkdocs_index, timeout=10):
+        return 'mkdocs'
+
+    return None
+
+
+def extract_mkdocs_edit_url(main_page_html):
+    """
+    Extract GitHub edit URL from MkDocs page to deduce source repository.
+
+    Returns base URL like: https://github.com/org/repo/blob/branch/src/
+    """
+    if not main_page_html:
+        return None
+
+    # Look for "Edit this page" or similar GitHub links
+    # Pattern: href="https://github.com/org/repo/edit/branch/path/file.md"
+    patterns = [
+        r'href="(https://github\.com/[^/]+/[^/]+)/edit/([^/]+)/(.+?\.md)"',
+        r'href="(https://github\.com/[^/]+/[^/]+)/blob/([^/]+)/(.+?\.md)"',
+    ]
+
+    for pattern in patterns:
+        matches = re.findall(pattern, main_page_html)
+        if matches:
+            repo_url, branch, file_path = matches[0]
+
+            # Extract the source directory (everything except the filename)
+            if '/' in file_path:
+                source_dir = '/'.join(file_path.split('/')[:-1])
+                return f'{repo_url}/blob/{branch}/{source_dir}'
+            else:
+                return f'{repo_url}/blob/{branch}'
+
+    return None
+
+
+def get_sphinx_pages(docs_url, source_repo_url=None, validate=False):
+    """Extract all pages from Sphinx documentation."""
     # Ensure docs_url ends with /
     if not docs_url.endswith('/'):
         docs_url += '/'
 
     # Fetch searchindex.js
     searchindex_url = urljoin(docs_url, 'searchindex.js')
-    print(f"Fetching search index from: {searchindex_url}", file=sys.stderr)
+    print(f"Fetching Sphinx search index from: {searchindex_url}", file=sys.stderr)
 
     content = fetch_url(searchindex_url)
     if not content:
@@ -125,7 +171,7 @@ def get_all_pages(docs_url, source_repo_url=None, validate=False):
             'docname': docname,
             'title': title,
             'html_url': urljoin(docs_url, f'{docname}.html'),
-            'rst_filename': f'{docname}.rst',
+            'source_filename': f'{docname}.rst',
         }
 
         # Determine source URL (prioritize _sources/, then repo URL)
@@ -151,6 +197,7 @@ def get_all_pages(docs_url, source_repo_url=None, validate=False):
 
     result = {
         'docs_url': docs_url,
+        'doc_type': 'sphinx',
         'has_sources_dir': has_sources_dir,
         'total_pages': len(pages),
         'pages': pages
@@ -165,6 +212,153 @@ def get_all_pages(docs_url, source_repo_url=None, validate=False):
         validate_urls(pages, result)
 
     return result
+
+
+def get_mkdocs_pages(docs_url, source_repo_url=None, validate=False):
+    """Extract all pages from MkDocs documentation."""
+    # Ensure docs_url ends with /
+    if not docs_url.endswith('/'):
+        docs_url += '/'
+
+    # Fetch search/search_index.json
+    searchindex_url = urljoin(docs_url, 'search/search_index.json')
+    print(f"Fetching MkDocs search index from: {searchindex_url}", file=sys.stderr)
+
+    content = fetch_url(searchindex_url)
+    if not content:
+        print("ERROR: Could not fetch search/search_index.json", file=sys.stderr)
+        return None
+
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: Invalid JSON in search index: {e}", file=sys.stderr)
+        return None
+
+    docs = data.get('docs', [])
+    if not docs:
+        print("WARNING: No documents found in search index", file=sys.stderr)
+
+    # Filter and group documents
+    # MkDocs includes anchors (page.html#section) as separate entries
+    # We only want the base pages (page.html)
+    pages_dict = {}
+    for doc in docs:
+        location = doc.get('location', '')
+        title = doc.get('title', '')
+
+        # Skip empty locations
+        if not location:
+            continue
+
+        # Extract base page (remove anchor)
+        if '#' in location:
+            base_page = location.split('#')[0]
+        else:
+            base_page = location
+
+        # Skip if we already have this page
+        if base_page in pages_dict:
+            continue
+
+        # Store page info (use first occurrence for title)
+        pages_dict[base_page] = {
+            'location': base_page,
+            'title': title
+        }
+
+    print(f"Found {len(pages_dict)} unique pages (filtered from {len(docs)} entries)", file=sys.stderr)
+
+    # Try to extract source repo from "Edit this page" links
+    detected_repo_url = None
+    if not source_repo_url:
+        print("Attempting to detect source repository from 'Edit this page' links...", file=sys.stderr)
+        main_page = fetch_url(docs_url)
+        detected_repo_url = extract_mkdocs_edit_url(main_page)
+
+        if detected_repo_url:
+            print(f"✓ Detected source repository: {detected_repo_url}", file=sys.stderr)
+            source_repo_url = detected_repo_url
+        else:
+            print("✗ Could not detect source repository", file=sys.stderr)
+            print("  Consider providing --source-repo option", file=sys.stderr)
+
+    # MkDocs doesn't serve _sources/ directory
+    has_sources_dir = False
+
+    # Build page index
+    pages = []
+    for base_page, info in sorted(pages_dict.items()):
+        # Convert location to docname (remove .html extension)
+        docname = base_page.replace('.html', '') if base_page.endswith('.html') else base_page
+
+        # MkDocs uses .md files
+        source_filename = f'{docname}.md'
+
+        page_info = {
+            'docname': docname,
+            'title': info['title'] or docname,
+            'html_url': urljoin(docs_url, base_page),
+            'source_filename': source_filename,
+        }
+
+        # Add source URL if we have repo info
+        if source_repo_url:
+            repo_url = source_repo_url.rstrip('/') + '/'
+            source_url = urljoin(repo_url, source_filename)
+            page_info['source_url'] = source_url
+            page_info['repo_source_url'] = source_url
+
+        pages.append(page_info)
+
+    result = {
+        'docs_url': docs_url,
+        'doc_type': 'mkdocs',
+        'has_sources_dir': has_sources_dir,
+        'total_pages': len(pages),
+        'pages': pages
+    }
+
+    if source_repo_url:
+        result['source_repo_url'] = source_repo_url
+
+    # Validate URLs if requested
+    if validate:
+        print(f"\nValidating source URLs for {len(pages)} pages...", file=sys.stderr)
+        validate_urls(pages, result)
+
+    return result
+
+
+def get_all_pages(docs_url, source_repo_url=None, validate=False):
+    """
+    Extract all pages from Sphinx or MkDocs documentation.
+
+    Auto-detects the documentation type and calls the appropriate handler.
+
+    Args:
+        docs_url: Base URL of the documentation
+        source_repo_url: Optional source repository base URL
+        validate: If True, validate that source URLs are reachable
+
+    Returns:
+        Dictionary with page information
+    """
+    # Detect documentation type
+    print(f"Detecting documentation type for {docs_url}", file=sys.stderr)
+    doc_type = detect_doc_type(docs_url)
+
+    if doc_type == 'sphinx':
+        print("✓ Detected: Sphinx documentation", file=sys.stderr)
+        return get_sphinx_pages(docs_url, source_repo_url, validate)
+    elif doc_type == 'mkdocs':
+        print("✓ Detected: MkDocs documentation", file=sys.stderr)
+        return get_mkdocs_pages(docs_url, source_repo_url, validate)
+    else:
+        print("ERROR: Could not detect documentation type", file=sys.stderr)
+        print("  Tried: Sphinx (searchindex.js), MkDocs (search/search_index.json)", file=sys.stderr)
+        print("  This may not be Sphinx or MkDocs documentation", file=sys.stderr)
+        return None
 
 
 def validate_urls(pages, result):
@@ -233,11 +427,11 @@ def validate_urls(pages, result):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Extract all pages from Sphinx documentation',
+        description='Extract all pages from Sphinx or MkDocs documentation',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__
     )
-    parser.add_argument('docs_url', help='Base URL of the Sphinx documentation')
+    parser.add_argument('docs_url', help='Base URL of the documentation (Sphinx or MkDocs)')
     parser.add_argument('--source-repo', '--github-repo', '--github', dest='source_repo_url',
                         help='Source repository base URL (e.g., GitHub) for source files (optional)')
     parser.add_argument('-o', '--output', help='Output JSON file (default: stdout)')
@@ -277,9 +471,10 @@ def main():
         output = json.dumps(figpack_output, indent=2)
     else:  # text format
         lines = [
-            f"Sphinx Documentation Index",
+            f"Documentation Index ({result.get('doc_type', 'unknown').upper()})",
             f"=" * 80,
             f"Documentation URL:  {result['docs_url']}",
+            f"Type:               {result.get('doc_type', 'unknown')}",
             f"Has _sources/ dir:  {result['has_sources_dir']}",
         ]
 
@@ -297,10 +492,10 @@ def main():
             if page.get('title'):
                 lines.append(f"  Title:      {page['title']}")
             lines.append(f"  HTML:       {page['html_url']}")
-            lines.append(f"  RST File:   {page['rst_filename']}")
+            lines.append(f"  Source:     {page['source_filename']}")
             if page.get('source_url'):
                 lines.append(f"  Source URL: {page['source_url']}")
-            if page.get('repo_source_url'):
+            if page.get('repo_source_url') and page.get('repo_source_url') != page.get('source_url'):
                 lines.append(f"  Repo URL:   {page['repo_source_url']}")
             lines.append("")
 

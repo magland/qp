@@ -1,10 +1,12 @@
-# Sphinx Documentation Index Extraction
+# Sphinx and MkDocs Documentation Index Extraction
 
 ## Overview
 
-This directory contains a script to extract a complete index of all pages from any Sphinx-built documentation and map them to their source files.
+This directory contains a script to extract a complete index of all pages from **Sphinx** or **MkDocs** documentation and map them to their source files. The script auto-detects the documentation type.
 
-## Available Indexes in Sphinx Documentation
+## Documentation Index Files
+
+### Sphinx
 
 Sphinx generates several index/inventory files:
 
@@ -15,18 +17,35 @@ Sphinx generates several index/inventory files:
    - **Format**: Binary header + compressed data
    - **Use case**: API documentation, cross-project references
 
-2. **`searchindex.js`** - JavaScript search index
+2. **`searchindex.js`** - JavaScript search index ✓ **Used by this script**
    - Contains **143 pages** for DataLad docs
    - Has `docnames` array listing all documentation pages
    - Has `titles` array with page titles
    - Has `alltitles` mapping titles to documents
    - **Format**: JavaScript with JSON data
-   - **Use case**: Full-text search, complete page listing ← **Best for getting all pages**
+   - **Use case**: Full-text search, complete page listing
 
 3. **`_sources/` directory** - Source files served by docs
    - Most Sphinx sites serve raw `.rst.txt` files
    - Accessible via "View page source" links
    - **Most reliable** source URL option (no guessing needed)
+
+### MkDocs
+
+MkDocs generates:
+
+1. **`search/search_index.json`** - JSON search index ✓ **Used by this script**
+   - Contains **43 pages** (BIDS) + **1,415 anchor entries**
+   - Each entry has: `location`, `title`, `text`
+   - Includes both pages and anchors (filtered by this script)
+   - **Format**: Pure JSON
+   - **Use case**: Full-text search, page discovery
+
+2. **"Edit this page" links** - Repository source references
+   - MkDocs doesn't serve `_sources/` directory
+   - Links to GitHub/GitLab edit URLs
+   - Script auto-detects repository from these links
+   - **Use case**: Source file URL construction
 
 ## The Script
 
@@ -34,47 +53,58 @@ Sphinx generates several index/inventory files:
 
 ### Features
 
-- ✓ Extracts all pages from any Sphinx documentation by fetching `searchindex.js`
-- ✓ Maps docnames to source `.rst` files
-- ✓ **Prioritizes `_sources/` directory** for source URLs (most reliable)
-- ✓ Optionally includes repository URLs (GitHub, etc.) when provided
-- ✓ **Validates URLs** to ensure they're reachable (optional)
-- ✓ Outputs JSON or text format
-- ✓ Works with any Sphinx-hosted documentation
+- ✓ **Auto-detects documentation type** (Sphinx or MkDocs)
+- ✓ **Sphinx support**: Extracts pages from `searchindex.js`, uses `_sources/` directory when available
+- ✓ **MkDocs support**: Extracts pages from `search/search_index.json`, auto-detects source repository
+- ✓ Maps docnames to source files (`.rst` for Sphinx, `.md` for MkDocs)
+- ✓ **Prioritizes served sources** (`_sources/` for Sphinx, GitHub for MkDocs)
+- ✓ Optionally includes repository URLs when provided
+- ✓ **Validates URLs** to ensure they're reachable (optional, concurrent)
+- ✓ **Three output formats**: JSON (full metadata), text (human-readable), figpack (compatible schema)
+- ✓ Works with any Sphinx or MkDocs documentation site
 
-### Key Improvements (v2)
+### Key Features
 
+**v3 - MkDocs Support:**
+1. **Auto-detection** - Automatically detects Sphinx vs MkDocs
+2. **MkDocs support** - Parses `search/search_index.json`, filters anchors, auto-detects GitHub repo
+3. **Unified interface** - Same command works for both documentation types
+
+**v2 - Sphinx Enhancements:**
 1. **No more hallucinated URLs** - Uses actual `_sources/` directory when available
 2. **Renamed `github_url` → `source_url`** - More generic, doesn't assume GitHub
-3. **Added `--validate` option** - Checks if URLs are actually reachable (uses concurrent checks for speed)
+3. **Added `--validate` option** - Checks if URLs are actually reachable (concurrent)
 4. **Both URLs available** - When `--source-repo` is provided, both `source_url` and `repo_source_url` are included
 5. **Figpack format support** - New `--format figpack` option outputs in [figpack](https://flatironinstitute.github.io/figpack/) schema
 
 ### Usage
 
 ```bash
-# Simplest usage - auto-detects _sources/ directory
+# Simplest usage - auto-detects documentation type
+./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/  # Sphinx
+./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/  # MkDocs
+
+# Sphinx with _sources/ directory (auto-detected)
 ./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
 
-# With repository URLs (provides both _sources/ and GitHub URLs)
+# MkDocs with auto-detected GitHub repository
+./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/
+
+# With explicit repository URL (works for both Sphinx and MkDocs)
 ./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
   --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source
 
 # Validate that URLs are reachable
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ --validate
+./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --validate
 
 # Save to file
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ \
-  -o index.json
+./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o index.json
 
 # Text format output
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
-  --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source \
-  --format text
+./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --format text
 
 # Figpack format (compatible with figpack schema)
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
-  --format figpack -o doc-pages.json
+./sphinx_pages_index.py https://docs.datalad.org/en/stable/ --format figpack -o doc-pages.json
 ```
 
 ### Output Format
@@ -217,60 +247,105 @@ Validating source URLs for 143 pages...
     ✗ Invalid: 0
 ```
 
+## Sphinx vs MkDocs Comparison
+
+| Feature | Sphinx | MkDocs |
+|---------|--------|--------|
+| **Search index** | `searchindex.js` | `search/search_index.json` |
+| **Source files** | `_sources/*.rst.txt` (served) | Not served (GitHub only) |
+| **Detection** | Automatic | Automatic |
+| **Source URL** | From `_sources/` or `--source-repo` | Auto-detected from "Edit" links or `--source-repo` |
+| **File format** | `.rst` → `.html` | `.md` → `.html` |
+| **Anchors** | Filtered separately | Included in search index (filtered by script) |
+
 ## Examples
 
-### NWB Format Documentation (has _sources/)
+### Sphinx Examples
+
+#### NWB Format Documentation (Sphinx with _sources/)
 ```bash
 ./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o nwb.json
-# Uses _sources/ directory automatically
+# Auto-detects: Sphinx
+# Uses: _sources/ directory
+# Result: 6 pages with .rst.txt sources
 ```
 
-### DataLad Documentation (with GitHub repo)
+#### DataLad Documentation (Sphinx with GitHub repo)
 ```bash
 ./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
   --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source \
   -o datalad.json
-# Provides both _sources/ URLs and GitHub URLs
+# Auto-detects: Sphinx
+# Provides: Both _sources/ URLs and GitHub URLs
+# Result: 143 pages
 ```
 
-### Sphinx Documentation with Validation
+#### Sphinx Documentation with Validation
 ```bash
 ./sphinx_pages_index.py https://www.sphinx-doc.org/en/master/ --validate
-# Checks that all source URLs are reachable
+# Auto-detects: Sphinx
+# Validates: All source URLs are reachable
 ```
 
-### Python Documentation
+### MkDocs Examples
+
+#### BIDS Specification (MkDocs with auto-detected repo)
+```bash
+./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ -o bids.json
+# Auto-detects: MkDocs
+# Auto-detects repo: https://github.com/bids-standard/bids-specification
+# Filters: 43 unique pages from 1458 search entries (removes anchors)
+# Result: 43 pages with .md sources from GitHub
+```
+
+#### MkDocs with Manual Repo URL
+```bash
+./sphinx_pages_index.py https://example-mkdocs.readthedocs.io/en/latest/ \
+  --source-repo https://github.com/org/repo/blob/main/docs \
+  --format text
+# Auto-detects: MkDocs
+# Uses: Provided repository URL
+# Output: Human-readable text format
+```
+
+### Universal Examples (Both Types)
+
+#### Figpack Format Output
+```bash
+# Works with both Sphinx and MkDocs
+./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
+  --format figpack -o doc-pages.json
+
+# Auto-detects documentation type
+# Output: figpack schema with includeFromStart: true for all pages
+```
+
+#### Python Documentation (Sphinx)
 ```bash
 ./sphinx_pages_index.py https://docs.python.org/3/ \
   --source-repo https://github.com/python/cpython/blob/main/Doc \
   --format text
 ```
 
-### Figpack Format Output
-```bash
-# Generate doc-pages.json in figpack schema
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
-  --format figpack -o doc-pages.json
-
-# The output will be compatible with figpack, with all pages having includeFromStart: true
-# Useful for integration with figpack-based documentation systems
-```
-
 ## Command-Line Options
 
-- `docs_url` - Base URL of Sphinx documentation (required)
+- `docs_url` - Base URL of documentation (Sphinx or MkDocs, auto-detected) (required)
 - `--source-repo URL` - Source repository base URL (optional, also accepts `--github-repo` or `--github`)
+  - For Sphinx: Supplements or replaces `_sources/` URLs
+  - For MkDocs: Used if auto-detection fails
 - `-o FILE`, `--output FILE` - Output file (default: stdout)
 - `--format {json,text,figpack}` - Output format (default: json)
-  - `json` - Full metadata with all fields
+  - `json` - Full metadata with all fields (includes `doc_type`, `has_sources_dir`)
   - `text` - Human-readable text format
   - `figpack` - Compatible with [figpack](https://flatironinstitute.github.io/figpack/) schema (`{docPages: [...]}`)
 - `--validate` - Validate that source URLs are reachable (optional, slower)
 
 ## Notes
 
-- The script works with any Sphinx documentation, regardless of hosting
-- No authentication required for public documentation
-- `_sources/` directory is a standard Sphinx feature (most sites have it)
-- Validation is optional but recommended to verify URLs
-- Compatible with Python 3.6+
+- **Auto-detection**: Tries Sphinx (`searchindex.js`) first, then MkDocs (`search/search_index.json`)
+- **Sphinx**: `_sources/` directory is a standard feature (most sites have it)
+- **MkDocs**: Auto-detects repository from "Edit this page" links when possible
+- **Filtering**: MkDocs anchor entries (`page.html#section`) are automatically filtered
+- **Validation**: Optional but recommended to verify URLs are reachable
+- **No authentication**: Works with public documentation only
+- **Compatible**: Python 3.6+
