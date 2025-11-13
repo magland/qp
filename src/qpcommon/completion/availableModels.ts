@@ -79,4 +79,12 @@ export const AVAILABLE_MODELS = [
       completion: 0.6,
     },
   },
+  {
+    model: "openai/gpt-4.1-mini",
+    label: "gpt-4.1-mini",
+    cost: {
+      prompt: 0.4,
+      completion: 1.6,
+    },
+  }
 ];
