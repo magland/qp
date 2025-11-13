@@ -1,5 +1,6 @@
+// Cheap models that can use server API key (updated November 2025)
 export const CHEAP_MODELS = [
-  "openai/gpt-4.1-mini",
-  "google/gemini-2.0-flash-001",
-  "openai/gpt-4o-mini",
+  "openai/gpt-5-nano",
+  "openai/gpt-5-mini",
+  "google/gemini-2.5-flash",
 ];
