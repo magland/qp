@@ -95,7 +95,7 @@ export async function handleCompletion(
     
     const userKey = request.headers.get('x-openrouter-key');
     const isCheapModel = CHEAP_MODELS.includes(body.model);
-    
+
     // For non-cheap models, require user's key
     if (!isCheapModel && !userKey) {
       return new Response(
@@ -109,9 +109,29 @@ export async function handleCompletion(
         }
       );
     }
-    
-    // Use user key if provided, otherwise fall back to environment variable (for cheap models)
-    const apiKey = userKey || env.OPENROUTER_API_KEY;
+
+    // Get API key with fallback chain:
+    // 1. User-provided key (highest priority)
+    // 2. Assistant-specific key (e.g., OPENROUTER_API_KEY_HED_ASSISTANT)
+    // 3. Global server key (backward compatibility)
+    let apiKey = userKey;
+    if (!apiKey && isCheapModel) {
+      // Try assistant-specific key for cheap models
+      const appName = body.app;
+      if (appName) {
+        // Convert app name to env var format: "hed-assistant" -> "HED_ASSISTANT"
+        const envVarName = `OPENROUTER_API_KEY_${appName.toUpperCase().replace(/-/g, '_')}`;
+        const assistantKey = (env as any)[envVarName];
+        if (assistantKey) {
+          apiKey = assistantKey;
+        }
+      }
+      // Fall back to global key if no assistant-specific key
+      if (!apiKey) {
+        apiKey = env.OPENROUTER_API_KEY;
+      }
+    }
+
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: 'API key not configured' }),

@@ -20,6 +20,7 @@ const processCompletion = async (
       type: "function",
       function: tool.toolFunction,
     })),
+    app: chat.app, // Pass assistant name for per-assistant API key routing
   };
 
   // const request: ORRequest = {
