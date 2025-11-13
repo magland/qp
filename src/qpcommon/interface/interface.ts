@@ -35,6 +35,8 @@ export type ChatAction =
       messageIndex: number;
     };
 
+const defaultModel = "openai/gpt-4.1-mini";
+
 export const emptyChat: Chat = {
   app: getAppName(),
   chatId: "",
@@ -44,7 +46,7 @@ export const emptyChat: Chat = {
     completionTokens: 0,
     estimatedCost: 0,
   },
-  model: "openai/gpt-5-nano",
+  model: defaultModel,
 };
 
 export const chatReducer = (state: Chat, action: ChatAction): Chat => {
