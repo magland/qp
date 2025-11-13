@@ -1,18 +1,26 @@
 export const AVAILABLE_MODELS = [
   {
-    model: "openai/gpt-4.1-mini",
-    label: "gpt-4.1-mini",
+    model: "openai/gpt-5-nano",
+    label: "gpt-5-nano",
     cost: {
-      prompt: 0.4,
-      completion: 1.6,
+      prompt: 0.05,
+      completion: 0.4,
     },
   },
   {
-    model: "google/gemini-2.0-flash-001",
-    label: "gemini-2.0-flash-001",
+    model: "openai/gpt-5-mini",
+    label: "gpt-5-mini",
     cost: {
-      prompt: 0.1,
-      completion: 0.4,
+      prompt: 0.25,
+      completion: 2,
+    },
+  },
+  {
+    model: "google/gemini-2.5-flash",
+    label: "gemini-2.5-flash",
+    cost: {
+      prompt: 0.3,
+      completion: 2.5,
     },
   },
   {

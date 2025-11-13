@@ -13,10 +13,12 @@ import {
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+// Cheap models that can use server API key (updated November 2025)
+// Selected based on low cost and good performance for general tasks
 const CHEAP_MODELS = [
-  'openai/gpt-4.1-mini',
-  'google/gemini-2.0-flash-001',
-  'openai/gpt-4o-mini',
+  'openai/gpt-5-nano',        // $0.05/$0.40 per M tokens - fastest, cheapest
+  'openai/gpt-5-mini',        // $0.25/$2 per M tokens - good balance
+  'google/gemini-2.5-flash',  // $0.30/$2.50 per M tokens - Google option
 ];
 
 const PHRASES_TO_CHECK = [
