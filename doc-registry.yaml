@@ -1,0 +1,57 @@
+# Documentation Registry
+# This file contains the list of documentation sites used by QP assistants.
+# The CI workflow will automatically generate doc-pages indices for these sites.
+
+documentation_sources:
+  # Figpack Assistant
+  - name: figpack
+    url: https://flatironinstitute.github.io/figpack/
+    type: other
+    assistant: figpack-assistant
+    notes: Already provides doc-pages.json at /doc-pages.json, no need to regenerate
+
+  # BIDS Assistant
+  - name: bids-specification
+    url: https://bids-specification.readthedocs.io/en/stable/
+    type: mkdocs
+    assistant: bids-assistant
+    notes: BIDS specification documentation
+
+  # NWB Assistant - Multiple documentation sites
+  - name: neuroconv
+    url: https://neuroconv.readthedocs.io/en/main/
+    type: sphinx
+    assistant: nwb-assistant
+    notes: NeuroConv documentation
+
+  - name: pynwb
+    url: https://pynwb.readthedocs.io/en/latest/
+    type: sphinx
+    assistant: nwb-assistant
+    notes: PyNWB documentation
+
+  - name: nwbinspector
+    url: https://nwbinspector.readthedocs.io/en/dev/
+    type: sphinx
+    assistant: nwb-assistant
+    notes: NWB Inspector documentation
+
+  - name: hdmf
+    url: https://hdmf.readthedocs.io/en/stable/
+    type: sphinx
+    assistant: nwb-assistant
+    notes: HDMF documentation
+
+  # Stan Assistant
+  - name: stan-users-guide
+    url: https://mc-stan.org/docs/stan-users-guide/
+    type: other
+    assistant: stan-assistant
+    notes: Stan Users Guide (may need special handling)
+
+  # DataLad (example from PR description)
+  - name: datalad
+    url: https://docs.datalad.org/en/stable/
+    type: sphinx
+    assistant: none
+    notes: Example from PR, can be added to an assistant in the future
