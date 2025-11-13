@@ -3,13 +3,13 @@
 Extract all pages from Sphinx or MkDocs documentation and map them to source files.
 
 Usage:
-    sphinx_pages_index.py <docs_url> [options]
+    doc_pages_index.py <docs_url> [options]
 
 Example:
-    sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
-    sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/
-    sphinx_pages_index.py https://docs.datalad.org/en/stable/ --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source
-    sphinx_pages_index.py https://docs.python.org/3/ --validate
+    doc_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
+    doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/
+    doc_pages_index.py https://docs.datalad.org/en/stable/ --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source
+    doc_pages_index.py https://docs.python.org/3/ --validate
 """
 
 import argparse

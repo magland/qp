@@ -49,7 +49,7 @@ MkDocs generates:
 
 ## The Script
 
-**File**: `sphinx_pages_index.py`
+**File**: `doc_pages_index.py`
 
 ### Features
 
@@ -81,30 +81,30 @@ MkDocs generates:
 
 ```bash
 # Simplest usage - auto-detects documentation type
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/  # Sphinx
-./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/  # MkDocs
+./doc_pages_index.py https://nwb-schema.readthedocs.io/en/latest/  # Sphinx
+./doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/  # MkDocs
 
 # Sphinx with _sources/ directory (auto-detected)
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
+./doc_pages_index.py https://nwb-schema.readthedocs.io/en/latest/
 
 # MkDocs with auto-detected GitHub repository
-./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/
+./doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/
 
 # With explicit repository URL (works for both Sphinx and MkDocs)
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
+./doc_pages_index.py https://docs.datalad.org/en/stable/ \
   --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source
 
 # Validate that URLs are reachable
-./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --validate
+./doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --validate
 
 # Save to file
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o index.json
+./doc_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o index.json
 
 # Text format output
-./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --format text
+./doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/ --format text
 
 # Figpack format (compatible with figpack schema)
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ --format figpack -o doc-pages.json
+./doc_pages_index.py https://docs.datalad.org/en/stable/ --format figpack -o doc-pages.json
 ```
 
 ### Output Format
@@ -225,7 +225,7 @@ The script uses the following priority for source URLs:
 The `--validate` option checks if source URLs are actually reachable:
 
 ```bash
-./sphinx_pages_index.py https://example.com/scripts/ --validate
+./doc_pages_index.py https://example.com/scripts/ --validate
 ```
 
 Features:
@@ -264,7 +264,7 @@ Validating source URLs for 143 pages...
 
 #### NWB Format Documentation (Sphinx with _sources/)
 ```bash
-./sphinx_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o nwb.json
+./doc_pages_index.py https://nwb-schema.readthedocs.io/en/latest/ -o nwb.json
 # Auto-detects: Sphinx
 # Uses: _sources/ directory
 # Result: 6 pages with .rst.txt sources
@@ -272,7 +272,7 @@ Validating source URLs for 143 pages...
 
 #### DataLad Documentation (Sphinx with GitHub repo)
 ```bash
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
+./doc_pages_index.py https://docs.datalad.org/en/stable/ \
   --source-repo https://github.com/datalad/datalad/blob/maint/scripts/source \
   -o datalad.json
 # Auto-detects: Sphinx
@@ -282,7 +282,7 @@ Validating source URLs for 143 pages...
 
 #### Sphinx Documentation with Validation
 ```bash
-./sphinx_pages_index.py https://www.sphinx-doc.org/en/master/ --validate
+./doc_pages_index.py https://www.sphinx-doc.org/en/master/ --validate
 # Auto-detects: Sphinx
 # Validates: All source URLs are reachable
 ```
@@ -291,7 +291,7 @@ Validating source URLs for 143 pages...
 
 #### BIDS Specification (MkDocs with auto-detected repo)
 ```bash
-./sphinx_pages_index.py https://bids-specification.readthedocs.io/en/stable/ -o bids.json
+./doc_pages_index.py https://bids-specification.readthedocs.io/en/stable/ -o bids.json
 # Auto-detects: MkDocs
 # Auto-detects repo: https://github.com/bids-standard/bids-specification
 # Filters: 43 unique pages from 1458 search entries (removes anchors)
@@ -300,7 +300,7 @@ Validating source URLs for 143 pages...
 
 #### MkDocs with Manual Repo URL
 ```bash
-./sphinx_pages_index.py https://example-mkdocs.readthedocs.io/en/latest/ \
+./doc_pages_index.py https://example-mkdocs.readthedocs.io/en/latest/ \
   --source-repo https://github.com/org/repo/blob/main/docs \
   --format text
 # Auto-detects: MkDocs
@@ -313,7 +313,7 @@ Validating source URLs for 143 pages...
 #### Figpack Format Output
 ```bash
 # Works with both Sphinx and MkDocs
-./sphinx_pages_index.py https://docs.datalad.org/en/stable/ \
+./doc_pages_index.py https://docs.datalad.org/en/stable/ \
   --format figpack -o doc-pages.json
 
 # Auto-detects documentation type
@@ -322,7 +322,7 @@ Validating source URLs for 143 pages...
 
 #### Python Documentation (Sphinx)
 ```bash
-./sphinx_pages_index.py https://docs.python.org/3/ \
+./doc_pages_index.py https://docs.python.org/3/ \
   --source-repo https://github.com/python/cpython/blob/main/Doc \
   --format text
 ```
