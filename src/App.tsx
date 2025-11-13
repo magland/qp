@@ -10,6 +10,7 @@ import testChatPreferences from "./assistants/test-chat/preferences";
 import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferences";
 import figpackAssistantPreferences from "./assistants/figpack-assistant/preferences";
 import bidsAssistantPreferences from "./assistants/bids-assistant/preferences";
+import hedAssistantPreferences from "./assistants/hed-assistant/preferences";
 
 function App() {
   const preferences = useMemo(() => {
@@ -28,6 +29,8 @@ function App() {
       return figpackAssistantPreferences;
     } else if (appName === "bids-assistant") {
       return bidsAssistantPreferences;
+    } else if (appName === "hed-assistant") {
+      return hedAssistantPreferences;
     } else {
       return {
         getAssistantSystemPrompt: async () => "Unknown assistant",
