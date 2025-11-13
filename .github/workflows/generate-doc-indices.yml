@@ -1,0 +1,183 @@
+name: Generate Documentation Indices
+
+on:
+  # Run on changes to the registry or the script
+  push:
+    branches:
+      - main
+    paths:
+      - 'doc-registry.yaml'
+      - 'scripts/doc_pages_index.py'
+  pull_request:
+    paths:
+      - 'doc-registry.yaml'
+      - 'scripts/doc_pages_index.py'
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  generate-indices:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Create doc-pages directory
+        run: |
+          mkdir -p public/doc-pages
+      
+      - name: Generate documentation indices
+        run: |
+          python3 << 'PYTHON_SCRIPT'
+          import os
+          import sys
+          import yaml
+          import subprocess
+          import hashlib
+          from urllib.parse import urlparse
+          
+          def url_to_filename(url):
+              """Convert a URL to a TLD-based filename."""
+              parsed = urlparse(url)
+              hostname = parsed.hostname or parsed.netloc
+              if hostname.startswith('www.'):
+                  hostname = hostname[4:]
+              return hostname.replace('.', '_').replace('-', '_') + '_figpack.json'
+          
+          def file_hash(filepath):
+              """Calculate SHA256 hash of a file."""
+              if not os.path.exists(filepath):
+                  return None
+              sha256 = hashlib.sha256()
+              with open(filepath, 'rb') as f:
+                  sha256.update(f.read())
+              return sha256.hexdigest()
+          
+          # Load registry
+          with open('doc-registry.yaml', 'r') as f:
+              registry = yaml.safe_load(f)
+          
+          doc_sources = registry.get('documentation_sources', [])
+          
+          if not doc_sources:
+              print("No documentation sources found in registry")
+              sys.exit(1)
+          
+          print(f"Found {len(doc_sources)} documentation sources")
+          
+          changes_made = False
+          output_dir = 'public/doc-pages'
+          
+          for source in doc_sources:
+              name = source.get('name')
+              url = source.get('url')
+              doc_type = source.get('type')
+              
+              if not url:
+                  print(f"Warning: Skipping {name} - no URL specified")
+                  continue
+              
+              # Skip non-indexable types for now
+              if doc_type not in ['sphinx', 'mkdocs']:
+                  print(f"Skipping {name} - type '{doc_type}' not yet supported by indexer")
+                  continue
+              
+              print(f"\nProcessing: {name}")
+              print(f"  URL: {url}")
+              print(f"  Type: {doc_type}")
+              
+              # Generate output filename
+              output_filename = url_to_filename(url)
+              output_path = os.path.join(output_dir, output_filename)
+              
+              print(f"  Output: {output_filename}")
+              
+              # Store hash of existing file
+              old_hash = file_hash(output_path)
+              
+              # Run doc_pages_index.py
+              try:
+                  result = subprocess.run(
+                      ['python3', 'scripts/doc_pages_index.py', url, '--format', 'figpack', '-o', output_path],
+                      capture_output=True,
+                      text=True,
+                      timeout=120
+                  )
+                  
+                  if result.returncode != 0:
+                      print(f"  Error generating index:")
+                      print(result.stderr)
+                      continue
+                  
+                  # Check if file changed
+                  new_hash = file_hash(output_path)
+                  if old_hash != new_hash:
+                      print(f"  ✓ Generated/updated {output_filename}")
+                      changes_made = True
+                  else:
+                      print(f"  ✓ No changes to {output_filename}")
+                  
+              except subprocess.TimeoutExpired:
+                  print(f"  Error: Timeout generating index for {name}")
+              except Exception as e:
+                  print(f"  Error: {e}")
+          
+          # Write a summary file
+          summary_path = os.path.join(output_dir, 'README.md')
+          with open(summary_path, 'w') as f:
+              f.write("# Documentation Indices\n\n")
+              f.write("This directory contains auto-generated documentation indices in the figpack format.\n\n")
+              f.write("These files are generated from the `doc-registry.yaml` file using the `scripts/doc_pages_index.py` script.\n\n")
+              f.write("## Available Indices\n\n")
+              
+              for source in doc_sources:
+                  if source.get('type') in ['sphinx', 'mkdocs']:
+                      filename = url_to_filename(source.get('url'))
+                      f.write(f"- **{source.get('name')}**: [{filename}]({filename})\n")
+                      f.write(f"  - URL: {source.get('url')}\n")
+                      f.write(f"  - Type: {source.get('type')}\n")
+                      f.write(f"  - Assistant: {source.get('assistant')}\n\n")
+          
+          print(f"\n{'='*60}")
+          if changes_made:
+              print("Changes detected - files will be committed")
+              # Create a marker file for the next step
+              with open('/tmp/changes_made', 'w') as f:
+                  f.write('true')
+          else:
+              print("No changes detected")
+          
+          PYTHON_SCRIPT
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [ -f /tmp/changes_made ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changes == 'true' && github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/doc-pages/
+          git commit -m "Update documentation indices [skip ci]"
+          git push
