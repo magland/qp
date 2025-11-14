@@ -3,7 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
 # Environment variables (set these via wrangler secret put or in Cloudflare dashboard)
-# OPENROUTER_API_KEY - for cheap models
+# OPENROUTER_API_KEY - Global fallback key for all assistants (for cheap models)
+# OPENROUTER_API_KEY_<ASSISTANT_NAME> - Optional per-assistant keys (for cheap models)
+#   Examples:
+#   - OPENROUTER_API_KEY_HED_ASSISTANT
+#   - OPENROUTER_API_KEY_BIDS_ASSISTANT
+#   Assistant names are converted from "hed-assistant" to "HED_ASSISTANT" format
 # ADMIN_KEY - for protected operations
 
 # D1 Database binding

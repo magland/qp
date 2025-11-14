@@ -1,0 +1,13 @@
+# Local development environment variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# Global OpenRouter API key (fallback for all assistants)
+OPENROUTER_API_KEY=sk-or-v1-your-global-key-here
+
+# Optional: Per-assistant OpenRouter API keys
+# These override the global key for specific assistants when using cheap models
+# OPENROUTER_API_KEY_HED_ASSISTANT=sk-or-v1-your-hed-specific-key-here
+# OPENROUTER_API_KEY_BIDS_ASSISTANT=sk-or-v1-your-bids-specific-key-here
+
+# Admin key for protected operations
+ADMIN_KEY=your-admin-key-here
