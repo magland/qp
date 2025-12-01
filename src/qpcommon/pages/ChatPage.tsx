@@ -381,7 +381,7 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
                 window.open(
                   window.location.href,
                   "_blank",
-                  "width=500,height=700,menubar=no,toolbar=no,location=no,status=no"
+                  "width=500,height=700,menubar=no,toolbar=no,location=no,status=no,noopener,noreferrer"
                 );
               }}
               title="Open chat in new window"
