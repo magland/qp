@@ -2,7 +2,8 @@
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
-  /^https:\/\/.*\.neurosift\.app$/
+  /^https:\/\/.*\.neurosift\.app$/,
+  /^https:\/\/(www\.)?hedtags\.org$/
 ];
 
 export function isOriginAllowed(origin: string | null): boolean {
