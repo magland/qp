@@ -87,7 +87,8 @@ export type CompletionRequest = {
   systemMessage: string;
   messages: ChatMessage[];
   tools: ORTool[];
-  app?: string; // Assistant name for per-assistant API key routing
+  app?: string;       // Assistant name for per-assistant API key routing
+  provider?: string;  // Optional provider preference (e.g., "Cerebras", "SambaNova")
 };
 
 export interface ChatRow {
