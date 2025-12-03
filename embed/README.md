@@ -2,8 +2,6 @@
 
 A portable, embeddable chat widget for QP assistants. Drop it into any website to add an AI chat assistant.
 
-**Author:** Seyed Yahya Shirazi ([neuromechanist.github.io](https://neuromechanist.github.io))
-
 ## Features
 
 - Standalone vanilla JavaScript (no frameworks required)
@@ -175,3 +173,4 @@ The widget automatically detects dark mode from:
 ## License
 
 MIT License - see the main QP repository for details.
+
