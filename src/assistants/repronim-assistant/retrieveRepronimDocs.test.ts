@@ -23,12 +23,11 @@ describe('ReproNim Assistant - retrieveRepronimDocs', () => {
 
       expect(preloadedDocs.length).toBeGreaterThan(0);
 
-      // Verify key documents are preloaded
+      // Verify repronim.org core content is preloaded (primary resources)
       const titles = preloadedDocs.map(doc => doc.title);
-      expect(titles.some(t => t.includes('HeuDiConv'))).toBe(true);
-      expect(titles.some(t => t.includes('DataLad'))).toBe(true);
-      expect(titles.some(t => t.includes('Neurodocker'))).toBe(true);
-      expect(titles.some(t => t.includes('ReproStim'))).toBe(true);
+      expect(titles.some(t => t.includes('Why Reproducible'))).toBe(true);
+      expect(titles.some(t => t.includes('ReproNim Approach'))).toBe(true);
+      expect(titles.some(t => t.includes('Getting Started'))).toBe(true);
     });
 
     it('should have valid URLs for all documents', () => {
@@ -66,6 +65,18 @@ describe('ReproNim Assistant - retrieveRepronimDocs', () => {
       expect(titles).toContain('Introduction');
       expect(titles).toContain('CLI');
       expect(titles).toContain('Installation');
+    });
+
+    it('should prioritize repronim.org content first in the list', () => {
+      const docPages = getDocPages();
+
+      // First documents should be from repronim.org
+      const firstFiveTitles = docPages.slice(0, 5).map(doc => doc.title);
+      expect(firstFiveTitles.every(t => t.startsWith('ReproNim -') || t.startsWith('ReproNim Tutorial'))).toBe(true);
+
+      // Should include tutorials from repronim.org
+      const repronimOrgDocs = docPages.filter(doc => doc.url.includes('repronim.org'));
+      expect(repronimOrgDocs.length).toBeGreaterThan(10);
     });
 
     it('should include training modules', () => {
