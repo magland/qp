@@ -4,7 +4,7 @@ A multi-tenant AI chat platform that hosts specialized AI assistants, each acces
 
 ## Chat Assistants
 
-This repository supports eight specialized chat applications:
+This repository supports nine specialized chat applications:
 
 ### 1. **stan-assistant**
 
@@ -37,6 +37,10 @@ Assistant for the [Brain Imaging Data Structure (BIDS)](https://bids.neuroimagin
 ### 8. **hed-assistant**
 
 Assistant for [Hierarchical Event Descriptors (HED)](https://www.hedtags.org/). Provides guidance on annotating events and data using HED tags, based on the HED specification and resources documentation.
+
+### 9. **repronim-assistant**
+
+Assistant for [ReproNim](https://repronim.org/) (Reproducible Neuroimaging). Helps with reproducibility tools and best practices including HeuDiConv, DataLad, Neurodocker, and related projects for data conversion, version control, and containerization.
 
 ## Architecture
 

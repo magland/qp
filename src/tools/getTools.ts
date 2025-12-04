@@ -10,6 +10,7 @@ import getDandisetExplorerTools from "../assistants/dandiset-explorer/getTools";
 import getFigpackAssistantTools from "../assistants/figpack-assistant/getTools";
 import getBidsAssistantTools from "../assistants/bids-assistant/getTools";
 import getHedAssistantTools from "../assistants/hed-assistant/getTools";
+import getRepronimAssistantTools from "../assistants/repronim-assistant/getTools";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTools = async (_chat: Chat): Promise<QPTool[]> => {
@@ -30,6 +31,8 @@ const getTools = async (_chat: Chat): Promise<QPTool[]> => {
     return getBidsAssistantTools();
   } else if (appName === "hed-assistant") {
     return getHedAssistantTools();
+  } else if (appName === "repronim-assistant") {
+    return getRepronimAssistantTools();
   } else {
     return Promise.resolve([]);
   }
