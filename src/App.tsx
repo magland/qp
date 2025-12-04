@@ -11,6 +11,7 @@ import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferen
 import figpackAssistantPreferences from "./assistants/figpack-assistant/preferences";
 import bidsAssistantPreferences from "./assistants/bids-assistant/preferences";
 import hedAssistantPreferences from "./assistants/hed-assistant/preferences";
+import repronimAssistantPreferences from "./assistants/repronim-assistant/preferences";
 
 function App() {
   const preferences = useMemo(() => {
@@ -31,6 +32,8 @@ function App() {
       return bidsAssistantPreferences;
     } else if (appName === "hed-assistant") {
       return hedAssistantPreferences;
+    } else if (appName === "repronim-assistant") {
+      return repronimAssistantPreferences;
     } else {
       return {
         getAssistantSystemPrompt: async () => "Unknown assistant",
