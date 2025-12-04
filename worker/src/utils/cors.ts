@@ -2,6 +2,7 @@
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
+  /^http:\/\/[^.]+\.localhost:5173$/,
   /^https:\/\/.*\.neurosift\.app$/,
   /^https:\/\/(www\.)?hedtags\.org$/
 ];
