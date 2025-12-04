@@ -34,13 +34,153 @@ export type DocPage = {
 
 export const getDocPages = (): DocPage[] => {
   return [
+    // =====================================================
+    // PRIMARY: ReproNim.org website content (from Hugo site)
+    // These are the authoritative resources and should be consulted first
+    // =====================================================
+
+    // About & Core Concepts
+    {
+      title: "ReproNim - Why Reproducible Neuroimaging",
+      url: "https://repronim.org/about/why/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/about/why.md",
+      includeFromStart: true,
+    },
+    {
+      title: "ReproNim - The ReproNim Approach",
+      url: "https://repronim.org/about/repronim-approach/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/about/repronim-approach.md",
+      includeFromStart: true,
+    },
+    {
+      title: "ReproNim - Getting Started",
+      url: "https://repronim.org/resources/getting-started/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/getting-started/_index.md",
+      includeFromStart: true,
+    },
+    {
+      title: "ReproNim - Tools Overview",
+      url: "https://repronim.org/resources/tools/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tools/_index.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim - Training Overview",
+      url: "https://repronim.org/resources/training/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/training/_index.md",
+      includeFromStart: false,
+    },
+
+    // Tutorials from repronim.org (Principle-based organization)
+    {
+      title: "ReproNim Tutorial - Tutorials Overview",
+      url: "https://repronim.org/resources/tutorials/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/_index.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - DICOM to BIDS Conversion",
+      url: "https://repronim.org/resources/tutorials/dicom-to-bids/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/dicom-to-bids.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Data Dictionary",
+      url: "https://repronim.org/resources/tutorials/data-dictionary/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/data-dictionary.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Data Management and Sharing",
+      url: "https://repronim.org/resources/tutorials/data-management-and-sharing/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/data-management-and-sharing.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Estimating Costs",
+      url: "https://repronim.org/resources/tutorials/estimating-costs/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/estimating-costs.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Git Version Control",
+      url: "https://repronim.org/resources/tutorials/git/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/git.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Neurodocker Containerization",
+      url: "https://repronim.org/resources/tutorials/neurodocker/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/neurodocker.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - ReproNim Containers with DataLad",
+      url: "https://repronim.org/resources/tutorials/repronim-containers/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/repronim-containers.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - ReproSchema",
+      url: "https://repronim.org/resources/tutorials/reproschema/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/reproschema.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Nipoppy Workflow",
+      url: "https://repronim.org/resources/tutorials/nipoppy/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/nipoppy.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - FreeSurfer",
+      url: "https://repronim.org/resources/tutorials/freesurfer/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/freesurfer.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - FSL",
+      url: "https://repronim.org/resources/tutorials/fsl/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/fsl.md",
+      includeFromStart: false,
+    },
+    {
+      title: "ReproNim Tutorial - Publish Everything",
+      url: "https://repronim.org/resources/tutorials/publish-everything/",
+      sourceUrl:
+        "https://raw.githubusercontent.com/repronim/repronim.org/main/content/resources/tutorials/publish-everything.md",
+      includeFromStart: false,
+    },
+
+    // =====================================================
+    // SECONDARY: Tool-specific documentation
+    // Detailed technical docs for individual tools
+    // =====================================================
+
     // HeuDiConv documentation
     {
       title: "HeuDiConv Quickstart",
       url: "https://heudiconv.readthedocs.io/en/latest/quickstart.html",
       sourceUrl:
         "https://raw.githubusercontent.com/nipy/heudiconv/master/docs/quickstart.rst",
-      includeFromStart: true,
+      includeFromStart: false,
     },
     {
       title: "HeuDiConv Installation",
@@ -63,13 +203,14 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/nipy/heudiconv/master/docs/tutorials.rst",
       includeFromStart: false,
     },
+
     // DataLad documentation
     {
       title: "DataLad Handbook - Introduction",
       url: "https://handbook.datalad.org/en/latest/intro/philosophy.html",
       sourceUrl:
         "https://raw.githubusercontent.com/datalad-handbook/book/main/docs/intro/philosophy.rst",
-      includeFromStart: true,
+      includeFromStart: false,
     },
     {
       title: "DataLad Handbook - Installation",
@@ -99,13 +240,14 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/datalad-handbook/book/main/docs/basics/101-109-rerun.rst",
       includeFromStart: false,
     },
+
     // Neurodocker
     {
       title: "Neurodocker README",
       url: "https://github.com/ReproNim/neurodocker",
       sourceUrl:
         "https://raw.githubusercontent.com/ReproNim/neurodocker/master/README.md",
-      includeFromStart: true,
+      includeFromStart: false,
     },
     {
       title: "Neurodocker Examples",
@@ -114,6 +256,7 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/neurodocker/master/examples/README.md",
       includeFromStart: false,
     },
+
     // ReproIn
     {
       title: "ReproIn README",
@@ -122,6 +265,7 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/reproin/master/README.md",
       includeFromStart: false,
     },
+
     // ReproNim containers
     {
       title: "ReproNim Containers README",
@@ -130,6 +274,7 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/containers/master/README.md",
       includeFromStart: false,
     },
+
     // datalad-container
     {
       title: "DataLad-Container README",
@@ -138,6 +283,7 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/datalad/datalad-container/main/README.md",
       includeFromStart: false,
     },
+
     // ReproSchema
     {
       title: "ReproSchema README",
@@ -146,6 +292,7 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/reproschema/master/README.md",
       includeFromStart: false,
     },
+
     // ReproMan
     {
       title: "ReproMan README",
@@ -154,13 +301,14 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/reproman/master/README.md",
       includeFromStart: false,
     },
+
     // ReproStim documentation
     {
       title: "ReproStim Introduction",
       url: "https://reprostim.readthedocs.io/en/latest/intro/intro.html",
       sourceUrl:
         "https://raw.githubusercontent.com/ReproNim/reprostim/master/docs/source/intro/intro.rst",
-      includeFromStart: true,
+      includeFromStart: false,
     },
     {
       title: "ReproStim Overview",
@@ -246,7 +394,11 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/ReproNim/reprostim/master/README.md",
       includeFromStart: false,
     },
-    // Training modules
+
+    // =====================================================
+    // TERTIARY: Legacy training modules
+    // Older modular curriculum (still useful for deep dives)
+    // =====================================================
     {
       title: "ReproNim Module - Introduction",
       url: "http://www.repronim.org/module-intro/",

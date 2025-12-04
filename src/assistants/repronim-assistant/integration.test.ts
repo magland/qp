@@ -83,6 +83,12 @@ describe('ReproNim Assistant - Integration', () => {
       const toolPath = join(process.cwd(), 'src/assistants/repronim-assistant/retrieveRepronimDocs.tsx');
       const content = readFileSync(toolPath, 'utf8');
 
+      // Check for PRIMARY repronim.org content
+      expect(content).toContain('repronim.org/about/why');
+      expect(content).toContain('repronim.org/resources/getting-started');
+      expect(content).toContain('repronim.org/resources/tutorials');
+      expect(content).toContain('repronim.org/resources/tools');
+
       // Check for key ReproNim tools/resources
       expect(content).toContain('HeuDiConv');
       expect(content).toContain('DataLad');
@@ -99,10 +105,10 @@ describe('ReproNim Assistant - Integration', () => {
       expect(content).toContain('module-reproducible-basics');
       expect(content).toContain('module-FAIR-data');
 
-      // Verify we have a reasonable number of docs (now including ReproStim docs)
+      // Verify we have a reasonable number of docs (now including repronim.org + tool docs)
       const docMatches = content.match(/title:/g);
       expect(docMatches).toBeDefined();
-      expect(docMatches!.length).toBeGreaterThan(25); // At least 25 docs with ReproStim
+      expect(docMatches!.length).toBeGreaterThan(40); // At least 40 docs with repronim.org content
     });
 
     it('should have preloaded documents configured', () => {
