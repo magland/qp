@@ -6,39 +6,39 @@ A multi-tenant AI chat platform that hosts specialized AI assistants, each acces
 
 This repository supports nine specialized chat applications:
 
-### 1. **stan-assistant**
+### 1. **stan-assistant** — https://stan-assistant.neurosift.app/
 
 Technical assistant for [Stan](https://mc-stan.org/) probabilistic programming. Provides guidance and code examples based on the Stan User's Guide and Reference Manual.
 
-### 2. **nwb-assistant**
+### 2. **nwb-assistant** — https://nwb-assistant.neurosift.app/
 
 Assistant for [Neurodata Without Borders (NWB)](https://www.nwb.org/). Helps with PyNWB and related tools. Includes Jupyter integration for running Python code.
 
-### 3. **neurosift-chat**
+### 3. **neurosift-chat** — https://chat.neurosift.app/
 
 Explores and queries neuroscience datasets across DANDI Archive, OpenNeuro, and EBRAINS repositories. Features dataset search, NWB file analysis, and data visualization capabilities.
 
-### 4. **dandiset-explorer**
+### 4. **dandiset-explorer** — https://dandiset-explorer.neurosift.app/
 
 Specialized assistant for exploring specific Dandisets with Python/Jupyter integration.
 
-### 5. **test-chat**
+### 5. **test-chat** — https://test-chat.neurosift.app/
 
 Development testing assistant with Jupyter support.
 
-### 6. **figpack-assistant**
+### 6. **figpack-assistant** — https://figpack-assistant.neurosift.app/
 
 Assistant for [Figpack](https://flatironinstitute.github.io/figpack/).
 
-### 7. **bids-assistant**
+### 7. **bids-assistant** — https://bids-assistant.neurosift.app/
 
 Assistant for the [Brain Imaging Data Structure (BIDS)](https://bids.neuroimaging.io/) specification. Helps with organizing neuroimaging data according to BIDS standards.
 
-### 8. **hed-assistant**
+### 8. **hed-assistant** — https://hed-assistant.neurosift.app/
 
 Assistant for [Hierarchical Event Descriptors (HED)](https://www.hedtags.org/). Provides guidance on annotating events and data using HED tags, based on the HED specification and resources documentation.
 
-### 9. **repronim-assistant**
+### 9. **repronim-assistant** — https://repronim-assistant.neurosift.app/
 
 Assistant for [ReproNim](https://repronim.org/) (Reproducible Neuroimaging). Helps with reproducibility tools and best practices including HeuDiConv, DataLad, Neurodocker, and related projects for data conversion, version control, and containerization.
 
