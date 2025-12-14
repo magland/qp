@@ -30,36 +30,51 @@ export type DocPage = {
   sourceUrl: string;
   includeFromStart: boolean;
   category?: string;
+  description?: string;
 };
 
 export const getDocPages = (): DocPage[] => {
   return [
-    // === PRELOADED: Specification (3 docs) ===
+    // === PRELOADED: Core (1 docs) ===
     {
-      title: "HED Introduction",
-      url: "https://www.hedtags.org/hed-specification/01_Introduction.html",
+      title: "HED annotation semantics",
+      url: "https://www.hedtags.org/hed-resources/HedAnnotationSemantics.html",
       sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/01_Introduction.md",
+        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/HedAnnotationSemantics.md",
       includeFromStart: true,
-      category: "specification",
+      category: "core",
+      description: "Outlines the fundamental principles and rules for HED annotation syntax and structure.",
     },
+    // === PRELOADED: Schema (1 docs) ===
+   {
+      title: "HED standard schema (latest)",
+      url: "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/schemas_latest_json/HEDLatest.json",
+      sourceUrl:
+        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/schemas_latest_json/HEDLatest.json",
+      includeFromStart: true,
+      category: "schemas",
+      description: "The latest version of the standard HED schema in JSON format, defining the hierarchical structure and vocabulary for HED tags.",
+    },
+    // === PRELOADED: Specification (2 docs) ===
     {
-      title: "HED Terminology",
+      title: "HED terminology",
       url: "https://www.hedtags.org/hed-specification/02_Terminology.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/02_Terminology.md",
       includeFromStart: true,
       category: "specification",
+      description: "Defines key terms and concepts used throughout the HED specification to ensure consistent understanding.",
     },
     {
-      title: "HED Basic Annotation",
+      title: "Basic annotation",
       url: "https://www.hedtags.org/hed-specification/04_Basic_annotation.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/04_Basic_annotation.md",
       includeFromStart: true,
       category: "specification",
+      description: "Covers the essential guidelines and methods for creating basic HED annotations for events.",
     },
-    // === PRELOADED: Resources (1 doc) ===
+    // === PRELOADED: Introductory (2 doc) ===
     {
       title: "Introduction to HED",
       url: "https://www.hedtags.org/hed-resources/IntroductionToHed.html",
@@ -67,294 +82,223 @@ export const getDocPages = (): DocPage[] => {
         "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/IntroductionToHed.md",
       includeFromStart: true,
       category: "introductory",
+      description: "Provides an overview of the Hierarchical Event Descriptors (HED) system, its purpose, and its applications in event annotation.",
     },
-
+    {
+      title: "How can you use HED?",
+      url: "https://www.hedtags.org/hed-resources/HowCanYouUseHed.html",
+      sourceUrl:
+        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HowCanYouUseHed.md",
+      includeFromStart: true,
+      category: "introductory",
+      description: "Explains various use cases and scenarios where HED can be effectively applied for event annotation in research data.",
+    },
     // === ON-DEMAND: Specification Details (7 docs) ===
     {
-      title: "HED Formats",
+      title: "HED formats",
       url: "https://www.hedtags.org/hed-specification/03_HED_formats.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/03_HED_formats.md",
       includeFromStart: false,
-      category: "specification-details",
+      category: "specification",
+      description: "Describes the different formats in which HED schemas and annotations can be represented and stored.",
     },
     {
-      title: "HED Advanced Annotation",
+      title: "Advanced annotation",
       url: "https://www.hedtags.org/hed-specification/05_Advanced_annotation.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/05_Advanced_annotation.md",
       includeFromStart: false,
-      category: "specification-details",
+      category: "specification",
+      description: "Discusses use of definitions, temporal scope, and other advanced annotation features.",
     },
     {
-      title: "HED Infrastructure and Tools",
-      url: "https://www.hedtags.org/hed-specification/06_Infrastructure_and_tools.html",
+      title: "HED support of BIDS",
+      url: "https://www.hedtags.org/hed-specification/06_Infrastructure_and_tools.html#hed-support-of-bids",
       sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/06_Infrastructure_and_tools.md",
+        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/06_Infrastructure_and_tools.md#hed-support-of-bids",
       includeFromStart: false,
-      category: "specification-details",
+      category: "specification",
+      description: "Explains how HED integrates with the Brain Imaging Data Structure (BIDS) for standardized event annotation in neuroimaging datasets.",
     },
     {
-      title: "HED Library Schemas",
+      title: "Library schemas",
       url: "https://www.hedtags.org/hed-specification/07_Library_schemas.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/07_Library_schemas.md",
       includeFromStart: false,
-      category: "specification-details",
+      category: "specification",
+      description: "Details the concept of library schemas in HED, which allow for domain-specific extensions to the base HED schema.",
     },
     {
-      title: "HED Ontology",
-      url: "https://www.hedtags.org/hed-specification/08_HED_ontology.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/08_HED_ontology.md",
-      includeFromStart: false,
-      category: "specification-details",
-    },
-    {
-      title: "HED Specification Appendix A",
-      url: "https://www.hedtags.org/hed-specification/Appendix_A.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/Appendix_A.md",
-      includeFromStart: false,
-      category: "specification-details",
-    },
-    {
-      title: "HED Specification Appendix B",
+      title: "HED errors",
       url: "https://www.hedtags.org/hed-specification/Appendix_B.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/Appendix_B.md",
       includeFromStart: false,
-      category: "specification-details",
+      category: "specification",
+      description: "Lists and explains the various error codes and messages that can be encountered during HED annotation validation.",
     },
-
-    // === ON-DEMAND: Introductory (2 docs) ===
     {
-      title: "How Can You Use HED",
-      url: "https://www.hedtags.org/hed-resources/HowCanYouUseHed.html",
+      title: "Test cases",
+      url: "https://raw.githubusercontent.com/hed-standard/hed-specification/refs/heads/main/tests/javascriptTests.json",
       sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HowCanYouUseHed.md",
+        "https://raw.githubusercontent.com/hed-standard/hed-specification/refs/heads/main/tests/javascriptTests.json",
       includeFromStart: false,
-      category: "introductory",
+      category: "examples",
+      description: "Examples of correct and incorrect HED annotations in JSON format for testing validation tools.",
     },
+    // === ON-DEMAND: Quickstarts (2 docs) ===
     {
-      title: "HED History",
-      url: "https://www.hedtags.org/hed-resources/HedHistory.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedHistory.md",
-      includeFromStart: false,
-      category: "introductory",
-    },
-
-    // === ON-DEMAND: Quick Starts (3 docs) ===
-    {
-      title: "HED Annotation Quickstart",
+      title: "HED annotation quickstart",
       url: "https://www.hedtags.org/hed-resources/HedAnnotationQuickstart.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedAnnotationQuickstart.md",
       includeFromStart: false,
       category: "quickstart",
+      description: "A step-by-step guide to quickly get started with HED annotation for events in datasets.",
     },
     {
-      title: "BIDS Annotation Quickstart",
+      title: "BIDS annotation quickstart",
       url: "https://www.hedtags.org/hed-resources/BidsAnnotationQuickstart.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/BidsAnnotationQuickstart.md",
       includeFromStart: false,
       category: "quickstart",
+      description: "A concise tutorial on how to apply HED annotations within the BIDS framework for neuroimaging data.",
     },
     {
-      title: "HED Remodeling Quickstart",
-      url: "https://www.hedtags.org/hed-resources/HedRemodelingQuickstart.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedRemodelingQuickstart.md",
-      includeFromStart: false,
-      category: "quickstart",
-    },
-
-    // === ON-DEMAND: Core Concepts (4 docs) ===
-    {
-      title: "HED Annotation Semantics",
-      url: "https://www.hedtags.org/hed-resources/HedAnnotationSemantics.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedAnnotationSemantics.md",
-      includeFromStart: false,
-      category: "core-concepts",
-    },
-    {
-      title: "HED Conditions and Design Matrices",
-      url: "https://www.hedtags.org/hed-resources/HedConditionsAndDesignMatrices.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedConditionsAndDesignMatrices.md",
-      includeFromStart: false,
-      category: "core-concepts",
-    },
-    {
-      title: "HED Schemas",
-      url: "https://www.hedtags.org/hed-resources/HedSchemas.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSchemas.md",
-      includeFromStart: false,
-      category: "core-concepts",
-    },
-    {
-      title: "Understanding HED Versions",
-      url: "https://www.hedtags.org/hed-resources/UnderstandingHedVersions.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/UnderstandingHedVersions.md",
-      includeFromStart: false,
-      category: "core-concepts",
-    },
-
-    // === ON-DEMAND: Tools (5 docs) ===
-    {
-      title: "HED Python Tools",
-      url: "https://www.hedtags.org/hed-resources/HedPythonTools.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedPythonTools.md",
-      includeFromStart: false,
-      category: "tools",
-    },
-    {
-      title: "HED MATLAB Tools",
-      url: "https://www.hedtags.org/hed-resources/HedMatlabTools.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedMatlabTools.md",
-      includeFromStart: false,
-      category: "tools",
-    },
-    {
-      title: "HED JavaScript Tools",
-      url: "https://www.hedtags.org/hed-resources/HedJavascriptTools.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedJavascriptTools.md",
-      includeFromStart: false,
-      category: "tools",
-    },
-    {
-      title: "HED Online Tools",
-      url: "https://www.hedtags.org/hed-resources/HedOnlineTools.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedOnlineTools.md",
-      includeFromStart: false,
-      category: "tools",
-    },
-    {
-      title: "CTagger GUI Tagging Tool",
-      url: "https://www.hedtags.org/hed-resources/CTaggerGuiTaggingTool.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/CTaggerGuiTaggingTool.md",
-      includeFromStart: false,
-      category: "tools",
-    },
-
-    // === ON-DEMAND: Advanced Topics (5 docs) ===
-    {
-      title: "HED Remodeling Tools",
-      url: "https://www.hedtags.org/hed-resources/HedRemodelingTools.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedRemodelingTools.md",
-      includeFromStart: false,
-      category: "advanced",
-    },
-    {
-      title: "HED Schema Developers Guide",
-      url: "https://www.hedtags.org/hed-resources/HedSchemaDevelopersGuide.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSchemaDevelopersGuide.md",
-      includeFromStart: false,
-      category: "advanced",
-    },
-    {
-      title: "HED Validation Guide",
-      url: "https://www.hedtags.org/hed-resources/HedValidationGuide.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedValidationGuide.md",
-      includeFromStart: false,
-      category: "advanced",
-    },
-    {
-      title: "HED Search Guide",
-      url: "https://www.hedtags.org/hed-resources/HedSearchGuide.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSearchGuide.md",
-      includeFromStart: false,
-      category: "advanced",
-    },
-    {
-      title: "HED Summary Guide",
-      url: "https://www.hedtags.org/hed-resources/HedSummaryGuide.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSummaryGuide.md",
-      includeFromStart: false,
-      category: "advanced",
-    },
-
-    // === ON-DEMAND: Integration (3 docs) ===
-    {
-      title: "HED Annotation in NWB",
+      title: "HED annotation in NWB",
       url: "https://www.hedtags.org/hed-resources/HedAnnotationInNWB.html",
       sourceUrl:
         "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedAnnotationInNWB.md",
       includeFromStart: false,
-      category: "integration",
+      category: "quickstart",
+      description: "A concise tutorial on how to apply HED annotations within the NWB (Neurodata without borders) framework for neuroimaging data.",
     },
+    // === ON-DEMAND: Integration (1 docs) ===
+    {
+      title: "Getting started with HED in HWB",
+      url: "https://www.hedtags.org/ndx-hed/description.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/ndx-hed/refs/heads/main/docs/source/description.rst",
+      includeFromStart: false,
+      category: "core",
+      description: "More detailed description of the ndx-hed extension architecture and usage.",
+    },
+   
+    // === ON-DEMAND: Core concepts (2 docs) ===
+    {
+      title: "HED conditions and design matrices",
+      url: "https://www.hedtags.org/hed-resources/HedConditionsAndDesignMatrices.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedConditionsAndDesignMatrices.md",
+      includeFromStart: false,
+      category: "core",
+      description: "Explains how to represent experimental conditions and design matrices using HED annotations for complex study designs.",
+    },
+    {
+      title: "HED schemas",
+      url: "https://www.hedtags.org/hed-resources/HedSchemas.html",
+      sourceUrl:
+        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSchemas.md",
+      includeFromStart: false,
+      category: "core",
+      description: "Describes the structure and organization of HED schemas, including the standard schema and library schemas for specific domains."
+    },
+   
+    // === ON-DEMAND: Tools (4 docs) ===
+    {
+      title: "HED python tools",
+      url: "https://www.hedtags.org/hed-python/user_guide.html#",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-python/refs/heads/main/docs/user_guide.md",
+      includeFromStart: false,
+      category: "tools",
+      description: "Comprehensive guide to using the HED Python library for annotating, validating, and processing HED tags in datasets.",
+    },
+    {
+      title: "HED MATLAB tools",
+      url: "https://www.hedtags.org/hed-resources/HedMatlabTools.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedMatlabTools.md",
+      includeFromStart: false,
+      category: "tools",
+      description: "Instructions for utilizing the HED MATLAB toolbox to work with HED annotations within MATLAB environments.",
+    },
+    {
+      title: "HED JavaScript Tools",
+      url: "https://www.hedtags.org/hed-javascript/docs/",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-javascript/refs/heads/main/README.md",
+      includeFromStart: false,
+      category: "tools",
+      description: "Guide to using HED JavaScript libraries for client-side annotation and validation of HED tags in web applications.",
+    },
+    {
+      title: "HED online tools",
+      url: "https://www.hedtags.org/hed-resources/HedOnlineTools.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedOnlineTools.md",
+      includeFromStart: false,
+      category: "tools",
+      description: "Overview of online tools available for HED annotation, validation, and schema browsing through web interfaces.",
+    },
+
+    // === ON-DEMAND: Advanced (4 docs) ===
+    {
+      title: "HED schema developers guide",
+      url: "https://www.hedtags.org/hed-resources/HedSchemaDevelopersGuide.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSchemaDevelopersGuide.md",
+      includeFromStart: false,
+      category: "advanced",
+      description: "Instructions and best practices for developers looking to create and maintain HED library schemas.",
+    },
+    {
+      title: "HED validation guide",
+      url: "https://www.hedtags.org/hed-resources/HedValidationGuide.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedValidationGuide.md",
+      includeFromStart: false,
+      category: "advanced",
+      description: "Detailed instructions on how to validate HED annotations using various tools and best practices to ensure compliance with HED standards.",
+    },
+    {
+      title: "HED search guide",
+      url: "https://www.hedtags.org/hed-resources/HedSearchGuide.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSearchGuide.md",
+      includeFromStart: false,
+      category: "advanced",
+      description: "Instructions on how to effectively search and query HED tags within datasets using available tools.",
+    },
+    {
+      title: "HED summary guide",
+      url: "https://www.hedtags.org/hed-resources/HedSummaryGuide.html",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSummaryGuide.md",
+      includeFromStart: false,
+      category: "advanced",
+      description: "Guidance on generating and interpreting summaries of HED annotations in datasets to facilitate data analysis.",
+    },
+
+    // === ON-DEMAND: Integration (1 docs) ===
     {
       title: "HED and EEGLAB",
       url: "https://www.hedtags.org/hed-resources/HedAndEEGLAB.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedAndEEGLAB.md",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedAndEEGLAB.md",
       includeFromStart: false,
       category: "integration",
-    },
-    {
-      title: "HED Submission to INCF",
-      url: "https://www.hedtags.org/hed-resources/HedSubmissionToINCF.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedSubmissionToINCF.md",
-      includeFromStart: false,
-      category: "integration",
+      description: "Describes how to integrate HED annotations within the EEGLAB environment for EEG data analysis.",
     },
 
-    // === ON-DEMAND: Reference (5 docs) ===
+    // === ON-DEMAND: Reference (2 docs) ===
     {
-      title: "Documentation Summary",
+      title: "Documentation summary",
       url: "https://www.hedtags.org/hed-resources/DocumentationSummary.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/DocumentationSummary.md",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/DocumentationSummary.md",
       includeFromStart: false,
       category: "reference",
+      description: "An overview of all HED documentation resources, providing quick access to various guides, specifications, and tools.",
     },
     {
-      title: "HED Test Datasets",
+      title: "HED test datasets",
       url: "https://www.hedtags.org/hed-resources/HedTestDatasets.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedTestDatasets.md",
+      sourceUrl: "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedTestDatasets.md",
       includeFromStart: false,
       category: "reference",
-    },
-    {
-      title: "Example Datasets Overview",
-      url: "https://github.com/hed-standard/hed-examples/blob/main/datasets/README.md",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-examples/main/datasets/README.md",
-      includeFromStart: false,
-      category: "reference",
-    },
-    {
-      title: "HED Governance",
-      url: "https://www.hedtags.org/hed-resources/HedGovernance.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/HedGovernance.md",
-      includeFromStart: false,
-      category: "reference",
-    },
-    {
-      title: "What's New in HED",
-      url: "https://www.hedtags.org/hed-resources/WhatsNew.html",
-      sourceUrl:
-        "https://raw.githubusercontent.com/hed-standard/hed-resources/main/docs/source/WhatsNew.md",
-      includeFromStart: false,
-      category: "reference",
+      description: "A collection of datasets specifically designed for testing HED annotations and validation tools.",
     },
   ];
 };
@@ -459,10 +403,11 @@ export const getDetailedDescription = async () => {
 
   // List on-demand docs by category
   const categoryOrder = [
-    "specification-details",
-    "introductory",
+    "core",
+    "schemas",
     "quickstart",
-    "core-concepts",
+    "introductory",
+    "specification",
     "tools",
     "advanced",
     "integration",
@@ -470,14 +415,15 @@ export const getDetailedDescription = async () => {
   ];
 
   const categoryNames: { [key: string]: string } = {
-    "specification-details": "Specification Details",
-    introductory: "Introductory Guides",
-    quickstart: "Quick Start Tutorials",
-    "core-concepts": "Core Concepts",
-    tools: "Tool Guides",
-    advanced: "Advanced Topics",
-    integration: "Integration & Standards",
-    reference: "Reference & Meta",
+    core: "Core concepts",
+    schemas: "Schemas",
+    quickstart: "Quick start tutorials",
+    introductory: "Introductory guides",
+    specification: "Specification details",
+    tools: "Tool guides",
+    advanced: "Advanced topics",
+    integration: "Integration & standards",
+    reference: "Reference & meta",
   };
 
   for (const category of categoryOrder) {
