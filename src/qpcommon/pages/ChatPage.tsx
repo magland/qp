@@ -239,6 +239,81 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
     }
   }, [navigate, location.search, chatId, clearChat]);
 
+  const handleDownloadTranscript = useCallback(() => {
+    if (!chat || chat.messages.length === 0) return;
+
+    // Build the transcript in Markdown format
+    const lines: string[] = [];
+    lines.push(`# Chat Transcript`);
+    lines.push(``);
+    lines.push(`**Date:** ${new Date().toLocaleString()}`);
+    lines.push(`**Model:** ${chat.model}`);
+    lines.push(``);
+    lines.push(`---`);
+    lines.push(``);
+
+    for (const message of chat.messages) {
+      if (message.role === "user") {
+        lines.push(`## User`);
+        lines.push(``);
+        const content = typeof message.content === "string"
+          ? message.content
+          : message.content.map(part => part.type === "text" ? part.text : "[Image]").join("\n");
+        lines.push(content);
+        lines.push(``);
+      } else if (message.role === "assistant") {
+        lines.push(`## Assistant`);
+        lines.push(``);
+        if (message.content) {
+          const content = typeof message.content === "string"
+            ? message.content
+            : message.content.map(part => part.type === "text" ? part.text : "[Image]").join("\n");
+          lines.push(content);
+        }
+        if (message.tool_calls && message.tool_calls.length > 0) {
+          lines.push(``);
+          lines.push(`**Tool calls:**`);
+          for (const toolCall of message.tool_calls) {
+            lines.push(`- \`${toolCall.function.name}\``);
+          }
+        }
+        lines.push(``);
+      } else if (message.role === "tool") {
+        lines.push(`### Tool Result: ${message.name || "unknown"}`);
+        lines.push(``);
+        lines.push("```");
+        // Truncate very long tool outputs
+        const content = message.content.length > 2000
+          ? message.content.substring(0, 2000) + "\n... (truncated)"
+          : message.content;
+        lines.push(content);
+        lines.push("```");
+        lines.push(``);
+      }
+    }
+
+    // Add usage information
+    lines.push(`---`);
+    lines.push(``);
+    lines.push(`**Total Usage:**`);
+    lines.push(`- Prompt tokens: ${chat.totalUsage.promptTokens}`);
+    lines.push(`- Completion tokens: ${chat.totalUsage.completionTokens}`);
+    lines.push(`- Estimated cost: $${chat.totalUsage.estimatedCost.toFixed(4)}`);
+
+    const transcript = lines.join("\n");
+
+    // Create and trigger download
+    const blob = new Blob([transcript], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-transcript-${chatId || "new"}-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [chat, chatId]);
+
   const handleFeedbackUpdate = useCallback(
     (
       messageIndex: number,
@@ -372,6 +447,25 @@ const ChatPage: FunctionComponent<ChatPageProps> = ({
               }}
             >
               + New Chat
+            </button>
+            <button
+              onClick={handleDownloadTranscript}
+              className="new-chat-button"
+              disabled={chat.messages.length === 0}
+              style={{
+                padding: "0.4rem 1rem",
+                fontSize: "0.875rem",
+                borderRadius: "6px",
+                flexShrink: 0,
+                opacity: chat.messages.length === 0 ? 0.5 : 1,
+                cursor:
+                  chat.messages.length === 0
+                    ? "not-allowed"
+                    : "pointer",
+              }}
+              title="Download chat transcript as Markdown"
+            >
+              ⬇️ Download
             </button>
           </div>
           <a
