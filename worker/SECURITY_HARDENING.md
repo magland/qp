@@ -5,8 +5,8 @@ This document describes the security hardening measures implemented for the QP W
 ## Security Features Implemented
 
 ### 1. Rate Limiting
-- **Completion API**: 10 requests/minute, 100 requests/hour per IP
-- **Chat Operations**: 30 requests/minute, 500 requests/hour per IP
+- **Completion API**: 100 requests/minute, 1000 requests/hour per IP
+- **Chat Operations**: 300 requests/minute, 5000 requests/hour per IP
 - **Auto-blocking**: IPs with 10+ violations in an hour are blocked for 24 hours
 - **Privacy**: IP addresses are hashed (SHA-256) before storage
 
@@ -69,7 +69,7 @@ npx wrangler deploy
 {
   "error": "Rate limit exceeded",
   "retryAfter": 60,
-  "message": "Rate limit exceeded: 10 requests per minute"
+  "message": "Rate limit exceeded: 100 requests per minute"
 }
 ```
 

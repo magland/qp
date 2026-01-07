@@ -5,12 +5,12 @@ import { Env } from '../types';
 // Rate limit configurations
 export const RATE_LIMITS = {
   completion: {
-    perMinute: 10,
-    perHour: 100,
+    perMinute: 100,
+    perHour: 1000,
   },
   chatOps: {
-    perMinute: 30,
-    perHour: 500,
+    perMinute: 300,
+    perHour: 5000,
   },
 };
 
