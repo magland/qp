@@ -6,6 +6,7 @@ const ALLOWED_ORIGINS = [
   /^https:\/\/.*\.neurosift\.app$/,
   /^https:\/\/(www\.)?hedtags\.org$/,
   'https://magland.github.io',
+  "https://dandiset-metadata-assistant.surge.sh"
 ];
 
 export function isOriginAllowed(origin: string | null): boolean {
