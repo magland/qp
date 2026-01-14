@@ -22,6 +22,7 @@ const CHEAP_MODELS = [
   "openai/gpt-4.1-mini", // $0.40/$1.60 per M tokens
   "openai/gpt-oss-120b", // Cerebras - ultra-fast inference (2700+ tok/s)
   "qwen/qwen3-235b-a22b-2507", // Cerebras - fast open model
+  "moonshotai/kimi-k2-thinking"
 ];
 
 const PHRASES_TO_CHECK = [
