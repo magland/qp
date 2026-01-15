@@ -22,6 +22,9 @@
     subtitle: null,
     position: 'bottom-right',
     storageKey: 'qp-chat-history',
+    fullscreen: false,  // When true, renders as full-page chat (for popup windows)
+    cssUrl: null,       // Custom CSS URL (defaults to CDN)
+    jsUrl: null,        // Custom JS URL (defaults to CDN)
     theme: {
       primaryColor: '#055c9d',
       darkMode: false
@@ -44,7 +47,8 @@
     close: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
     send: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>',
     brain: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>',
-    reset: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>'
+    reset: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+    popout: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
   };
 
   // Load chat history from localStorage
@@ -515,6 +519,114 @@
     }
   }
 
+  // Open chat in a new popup window
+  async function openPopout() {
+    // Extract CSS from loaded stylesheets
+    function extractCss() {
+      let css = '';
+      for (const sheet of document.styleSheets) {
+        try {
+          if (sheet.href && sheet.href.includes('qp-chat-widget')) {
+            for (const rule of sheet.cssRules) {
+              css += rule.cssText + '\n';
+            }
+          }
+        } catch (e) {
+          // Cross-origin stylesheets can't be read
+        }
+      }
+      return css;
+    }
+
+    // Find the script URL
+    function getScriptUrl() {
+      const scripts = document.querySelectorAll('script[src*="qp-chat-widget"]');
+      if (scripts.length > 0) {
+        const src = scripts[scripts.length - 1].src;
+        return src;
+      }
+      return null;
+    }
+
+    // Get CSS and JS
+    const widgetCss = extractCss();
+    const scriptUrl = getScriptUrl();
+
+    let jsCode = '';
+    if (scriptUrl) {
+      try {
+        const response = await fetch(scriptUrl);
+        jsCode = await response.text();
+      } catch (e) {
+        console.error('Failed to fetch widget script:', e);
+      }
+    }
+
+    // Generate the popup HTML with full-page chat
+    const popupConfig = {
+      ...config,
+      fullscreen: true
+    };
+
+    // Create the popup content with inline CSS and JS
+    const popupHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(config.title)}</title>
+  <style>
+    ${widgetCss}
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .qp-chat-window.fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      border: none !important;
+      z-index: 1 !important;
+    }
+    .qp-chat-window.fullscreen .qp-chat-resize-handle {
+      display: none !important;
+    }
+    .qp-chat-window.fullscreen .qp-chat-popout {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    ${jsCode}
+  <\/script>
+  <script>
+    QPChat.init(${JSON.stringify(popupConfig)});
+  <\/script>
+</body>
+</html>`;
+
+    // Open the popup window
+    const popup = window.open('', '_blank', 'width=500,height=700,menubar=no,toolbar=no,location=no,status=no');
+    if (popup) {
+      popup.document.write(popupHtml);
+      popup.document.close();
+    } else {
+      alert('Please allow popups to open the chat in a new window.');
+    }
+  }
+
   // Setup resize functionality
   function setupResize(chatWindow) {
     const resizeHandle = chatWindow.querySelector('.qp-chat-resize-handle');
@@ -592,7 +704,10 @@
           <span class="qp-chat-title-text">${escapeHtml(config.title)}</span>
           <span class="qp-chat-status" id="qp-chat-status">${subtitle}</span>
         </div>
-        <button class="qp-chat-reset" id="qp-chat-reset" title="Reset conversation">${ICONS.reset}</button>
+        <div class="qp-chat-header-actions">
+          <button class="qp-chat-popout" id="qp-chat-popout" title="Open in new window">${ICONS.popout}</button>
+          <button class="qp-chat-reset" id="qp-chat-reset" title="Reset conversation">${ICONS.reset}</button>
+        </div>
       </div>
       <div class="qp-chat-messages" id="qp-chat-messages"></div>
       <div class="qp-chat-input-area">
@@ -607,8 +722,16 @@
       <div class="qp-chat-resize-handle"></div>
     `;
 
-    document.body.appendChild(toggleBtn);
-    document.body.appendChild(chatWindow);
+    // In fullscreen mode, only add the chat window (no toggle button)
+    if (config.fullscreen) {
+      chatWindow.classList.remove('hidden');
+      chatWindow.classList.add('fullscreen');
+      document.body.appendChild(chatWindow);
+      isOpen = true;
+    } else {
+      document.body.appendChild(toggleBtn);
+      document.body.appendChild(chatWindow);
+    }
 
     // Event listeners
     document.getElementById('qp-chat-form').onsubmit = handleSubmit;
@@ -616,9 +739,19 @@
       if (messages.length <= 1 || isLoading) return;
       resetConversation();
     };
+    document.getElementById('qp-chat-popout').onclick = openPopout;
 
-    setupResize(chatWindow);
+    if (!config.fullscreen) {
+      setupResize(chatWindow);
+    }
     widgetCreated = true;
+
+    // Auto-focus input in fullscreen mode
+    if (config.fullscreen) {
+      setTimeout(() => {
+        document.getElementById('qp-chat-input').focus();
+      }, 100);
+    }
   }
 
   // Initialize the widget

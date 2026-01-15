@@ -10,9 +10,10 @@ A portable, embeddable chat widget for QP assistants. Drop it into any website t
 - Streaming responses
 - Suggested questions
 - Resizable chat window
+- **Pop-out to new window** for side-by-side viewing with documentation
 - Mobile responsive
 - Dark mode support (auto-detects `data-bs-theme`, `data-theme`, or `.dark` class)
-- Persistent chat history via localStorage
+- Persistent chat history via localStorage (shared across pages and pop-out windows)
 
 ## Quick Start
 
@@ -69,7 +70,9 @@ QPChat.init({
   },
 
   // Advanced
-  cssUrl: 'qp-chat-widget.css'       // Custom CSS file URL
+  cssUrl: 'qp-chat-widget.css',      // Custom CSS file URL
+  jsUrl: 'qp-chat-widget.js',        // Custom JS file URL (used for pop-out)
+  fullscreen: false                  // When true, renders as full-page chat (for pop-out windows)
 });
 ```
 
@@ -148,6 +151,26 @@ Override CSS variables for custom theming:
   --qp-text-muted: #6b7280;
   --qp-text-light: #9ca3af;
 }
+```
+
+## Pop-out Window
+
+Click the pop-out button (arrow icon) in the chat header to open the chat in a new window. This allows you to:
+
+- View documentation and chat side-by-side
+- Continue the same conversation in the pop-out window
+- Resize the pop-out window independently
+
+The chat history is shared via localStorage, so the conversation persists between the embedded widget and the pop-out window (as long as they're on the same domain).
+
+**Note:** For the pop-out feature to work correctly, you should configure `jsUrl` and `cssUrl` with absolute URLs pointing to where your widget files are hosted:
+
+```javascript
+QPChat.init({
+  // ... other options
+  cssUrl: 'https://your-cdn.com/qp-chat-widget.css',
+  jsUrl: 'https://your-cdn.com/qp-chat-widget.js'
+});
 ```
 
 ## Dark Mode

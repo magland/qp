@@ -139,6 +139,37 @@
 .qp-chat-status-dot.offline { background: #ef4444; }
 .qp-chat-status-dot.checking { background: #f59e0b; }
 
+/* Header actions container */
+.qp-chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Pop-out button */
+.qp-chat-popout {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qp-chat-popout:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.qp-chat-popout svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Reset button */
 .qp-chat-reset {
   background: transparent;
@@ -704,4 +735,37 @@
 [data-theme="dark"] .qp-chat-resize-handle:hover::before,
 .dark .qp-chat-resize-handle:hover::before {
   border-color: #3b82f6;
+}
+
+/* Fullscreen mode (for popup windows) */
+.qp-chat-window.fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  border: none !important;
+  z-index: 1 !important;
+  animation: none !important;
+}
+
+.qp-chat-window.fullscreen .qp-chat-resize-handle {
+  display: none !important;
+}
+
+.qp-chat-window.fullscreen .qp-chat-popout {
+  display: none !important;
+}
+
+.qp-chat-window.fullscreen .qp-chat-header {
+  border-radius: 0;
+}
+
+.qp-chat-window.fullscreen .qp-chat-messages {
+  max-height: none;
 }
