@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QP Chat Widget - Basic Example</title>
+  <link rel="stylesheet" href="../qp-chat-widget.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      line-height: 1.6;
+    }
+    h1 { color: #055c9d; }
+  </style>
+</head>
+<body>
+  <h1>QP Chat Widget Demo</h1>
+  <p>This is a basic example of the QP Chat Widget. Click the chat button in the bottom-right corner to start a conversation.</p>
+
+  <h2>Features</h2>
+  <ul>
+    <li>Markdown rendering</li>
+    <li>Streaming responses</li>
+    <li>Suggested questions</li>
+    <li>Resizable window</li>
+    <li><strong>Pop-out to new window</strong> (click the arrow icon in the header)</li>
+    <li>Mobile responsive</li>
+    <li>Dark mode support</li>
+  </ul>
+
+  <h2>Try Dark Mode</h2>
+  <button onclick="toggleDarkMode()" style="padding: 0.5rem 1rem; cursor: pointer;">
+    Toggle Dark Mode
+  </button>
+
+  <script src="../qp-chat-widget.js"></script>
+  <script>
+    // Initialize the chat widget
+    QPChat.init({
+      title: 'Demo Assistant',
+      systemPrompt: 'You are a helpful demo assistant. Keep responses brief and friendly.',
+      initialMessage: 'Hi! I\'m a demo assistant. How can I help you today?',
+      suggestedQuestions: [
+        'What can you help me with?',
+        'Tell me a fun fact',
+        'How does this chat widget work?'
+      ],
+      theme: {
+        primaryColor: '#055c9d'
+      }
+    });
+
+    // Dark mode toggle for demo
+    function toggleDarkMode() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-bs-theme');
+      html.setAttribute('data-bs-theme', current === 'dark' ? 'light' : 'dark');
+      document.body.style.background = current === 'dark' ? '#ffffff' : '#0f172a';
+      document.body.style.color = current === 'dark' ? '#333333' : '#e2e8f0';
+    }
+  </script>
+</body>
+</html>
