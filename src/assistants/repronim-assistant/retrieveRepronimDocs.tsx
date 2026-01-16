@@ -275,6 +275,14 @@ export const getDocPages = (): DocPage[] => {
       includeFromStart: false,
     },
 
+    // Duct - execution monitoring
+    {
+      title: "Duct (con-duct) README",
+      url: "https://github.com/con/duct",
+      sourceUrl: "https://raw.githubusercontent.com/con/duct/master/README.md",
+      includeFromStart: false,
+    },
+
     // datalad-container
     {
       title: "DataLad-Container README",
