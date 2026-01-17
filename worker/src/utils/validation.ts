@@ -22,7 +22,7 @@ export function validateCompletionRequest(data: any): data is CompletionRequest 
     typeof data.model === 'string' &&
     typeof data.systemMessage === 'string' &&
     Array.isArray(data.messages) &&
-    Array.isArray(data.tools)
+    Array.isArray(data.tools || [])
   );
 }
 

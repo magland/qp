@@ -189,7 +189,7 @@ export async function handleCompletion(
       model: body.model,
       messages: [{ role: "system", content: systemMessage }, ...messages],
       stream: true,
-      tools: body.tools,
+      tools: body.tools || [],
     };
 
     // Add provider preference if specified (e.g., "Cerebras" for fast inference)

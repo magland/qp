@@ -86,7 +86,7 @@ export type CompletionRequest = {
   model: string;
   systemMessage: string;
   messages: ChatMessage[];
-  tools: ORTool[];
+  tools?: ORTool[];
   app?: string;       // Assistant name for per-assistant API key routing
   provider?: string;  // Optional provider preference (e.g., "Cerebras", "SambaNova")
 };
