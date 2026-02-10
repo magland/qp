@@ -4,7 +4,7 @@ A multi-tenant AI chat platform that hosts specialized AI assistants, each acces
 
 ## Chat Assistants
 
-This repository supports nine specialized chat applications:
+This repository supports eight specialized chat applications:
 
 ### 1. **stan-assistant** — https://stan-assistant.neurosift.app/
 
@@ -34,11 +34,7 @@ Assistant for [Figpack](https://flatironinstitute.github.io/figpack/).
 
 Assistant for the [Brain Imaging Data Structure (BIDS)](https://bids.neuroimaging.io/) specification. Helps with organizing neuroimaging data according to BIDS standards.
 
-### 8. **hed-assistant** — https://hed-assistant.neurosift.app/
-
-Assistant for [Hierarchical Event Descriptors (HED)](https://www.hedtags.org/). Provides guidance on annotating events and data using HED tags, based on the HED specification and resources documentation.
-
-### 9. **repronim-assistant** — https://repronim-assistant.neurosift.app/
+### 8. **repronim-assistant** — https://repronim-assistant.neurosift.app/
 
 Assistant for [ReproNim](https://repronim.org/) (Reproducible Neuroimaging). Helps with reproducibility tools and best practices including HeuDiConv, DataLad, Neurodocker, and related projects for data conversion, version control, and containerization.
 

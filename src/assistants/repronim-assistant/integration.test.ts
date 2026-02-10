@@ -151,7 +151,7 @@ describe('ReproNim Assistant - Integration', () => {
 
       // Should reference other specialized assistants
       expect(content).toContain('bids-assistant.neurosift.app');
-      expect(content).toContain('hed-assistant.neurosift.app');
+      expect(content).toContain('demo.osc.earth/hed');
       expect(content).toContain('nwb-assistant.neurosift.app');
     });
 
