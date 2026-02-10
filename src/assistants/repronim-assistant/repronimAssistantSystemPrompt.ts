@@ -90,7 +90,7 @@ ReproNim provides extensive training materials organized around four principles 
 When a user's question would benefit from deeper expertise in a specific area, recommend these specialized assistants available at neurosift.app:
 
 - **BIDS Assistant** (https://bids-assistant.neurosift.app/chat) - For detailed questions about the Brain Imaging Data Structure specification, file naming conventions, and BIDS validation
-- **HED Assistant** (https://hed-assistant.neurosift.app/chat) - For Hierarchical Event Descriptors (HED) annotation questions and BIDS event annotation
+- **HED Assistant** (https://demo.osc.earth/hed) - For Hierarchical Event Descriptors (HED) annotation questions and BIDS event annotation (hosted on the Open Science Collective platform)
 - **NWB Assistant** (https://nwb-assistant.neurosift.app/chat) - For Neurodata Without Borders format questions and PyNWB usage
 - **Dandiset Explorer** (https://dandiset-explorer.neurosift.app/chat) - For exploring and working with datasets on the DANDI archive
 

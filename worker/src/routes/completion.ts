@@ -127,14 +127,14 @@ export async function handleCompletion(
 
     // Get API key with fallback chain:
     // 1. User-provided key (highest priority)
-    // 2. Assistant-specific key (e.g., OPENROUTER_API_KEY_HED_ASSISTANT)
+    // 2. Assistant-specific key (e.g., OPENROUTER_API_KEY_BIDS_ASSISTANT)
     // 3. Global server key (backward compatibility)
     let apiKey = userKey;
     if (!apiKey && isCheapModel) {
       // Try assistant-specific key for cheap models
       const appName = body.app;
       if (appName) {
-        // Convert app name to env var format: "hed-assistant" -> "HED_ASSISTANT"
+        // Convert app name to env var format: "bids-assistant" -> "BIDS_ASSISTANT"
         const envVarName = `OPENROUTER_API_KEY_${appName.toUpperCase().replace(/-/g, "_")}`;
         const assistantKey = (env as any)[envVarName];
         if (assistantKey) {

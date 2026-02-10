@@ -6,9 +6,9 @@ compatibility_date = "2024-01-01"
 # OPENROUTER_API_KEY - Global fallback key for all assistants (for cheap models)
 # OPENROUTER_API_KEY_<ASSISTANT_NAME> - Optional per-assistant keys (for cheap models)
 #   Examples:
-#   - OPENROUTER_API_KEY_HED_ASSISTANT
 #   - OPENROUTER_API_KEY_BIDS_ASSISTANT
-#   Assistant names are converted from "hed-assistant" to "HED_ASSISTANT" format
+#   - OPENROUTER_API_KEY_STAN_ASSISTANT
+#   Assistant names are converted from "bids-assistant" to "BIDS_ASSISTANT" format
 # ADMIN_KEY - for protected operations
 
 # D1 Database binding

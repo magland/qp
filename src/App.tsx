@@ -10,7 +10,6 @@ import testChatPreferences from "./assistants/test-chat/preferences";
 import dandisetExplorerPreferences from "./assistants/dandiset-explorer/preferences";
 import figpackAssistantPreferences from "./assistants/figpack-assistant/preferences";
 import bidsAssistantPreferences from "./assistants/bids-assistant/preferences";
-import hedAssistantPreferences from "./assistants/hed-assistant/preferences";
 import repronimAssistantPreferences from "./assistants/repronim-assistant/preferences";
 
 function App() {
@@ -30,8 +29,6 @@ function App() {
       return figpackAssistantPreferences;
     } else if (appName === "bids-assistant") {
       return bidsAssistantPreferences;
-    } else if (appName === "hed-assistant") {
-      return hedAssistantPreferences;
     } else if (appName === "repronim-assistant") {
       return repronimAssistantPreferences;
     } else {
