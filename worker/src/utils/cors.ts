@@ -7,7 +7,8 @@ const ALLOWED_ORIGINS = [
   'https://magland.github.io',
   'https://dandi.github.io',
   'https://medit.dandiarchive.org',
-  "https://dandiset-metadata-assistant.surge.sh"
+  "https://dandiset-metadata-assistant.surge.sh",
+  'https://airesearchcoach.org'
 ];
 
 export function isOriginAllowed(origin: string | null): boolean {
