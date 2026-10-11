@@ -89,6 +89,7 @@ export type CompletionRequest = {
   tools?: ORTool[];
   app?: string;       // Assistant name for per-assistant API key routing
   provider?: string;  // Optional provider preference (e.g., "Cerebras", "SambaNova")
+  reasoning?: { effort?: string };  // Optional reasoning effort ("low", "medium" or "high")
 };
 
 export interface ChatRow {

@@ -4,6 +4,8 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   /^http:\/\/[^.]+\.localhost:5173$/,
   /^https:\/\/.*\.neurosift\.app$/,
+  // CatalystNeuro Cloudflare Pages deployment, including preview aliases
+  /^https:\/\/([a-z0-9-]+\.)?qp-a3n\.pages\.dev$/,
   'https://magland.github.io',
   'https://dandi.github.io',
   'https://medit.dandiarchive.org',
