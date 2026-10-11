@@ -11,9 +11,10 @@ import getFigpackAssistantTools from "../assistants/figpack-assistant/getTools";
 import getBidsAssistantTools from "../assistants/bids-assistant/getTools";
 import getRepronimAssistantTools from "../assistants/repronim-assistant/getTools";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getTools = async (_chat: Chat): Promise<QPTool[]> => {
-  const appName = getAppName();
+const getTools = async (chat: Chat): Promise<QPTool[]> => {
+  // Use the chat's own app, recorded when the page loaded; the URL may have
+  // lost an ?app= parameter after in-app navigation.
+  const appName = chat.app || getAppName();
   if (appName === "stan-assistant") {
     return getStanAssistantTools();
   } else if (appName === "nwb-assistant") {
