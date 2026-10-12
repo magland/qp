@@ -80,7 +80,7 @@ Deploy to Cloudflare:
 npm run deploy
 ```
 
-The worker will be deployed to your Cloudflare account and accessible at its workers.dev address (the production worker is `https://qp-worker.ben-dichter.workers.dev`).
+The worker will be deployed to your Cloudflare account and accessible at its workers.dev address (the production worker is `https://qp-worker.catalystneuro.workers.dev`).
 
 ## API Endpoints
 
