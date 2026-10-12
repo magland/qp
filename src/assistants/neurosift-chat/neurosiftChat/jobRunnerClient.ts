@@ -1,5 +1,5 @@
 export class JobRunnerClient {
-  private endpoint = "https://neurosift-search.vercel.app/api/execute-script";
+  private endpoint = "https://dandi-index.catalystneuro.com/api/execute-script";
 
   constructor() {
     // No initialization needed for simple HTTP approach

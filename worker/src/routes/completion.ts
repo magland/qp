@@ -25,7 +25,8 @@ const CHEAP_MODELS = [
   "qwen/qwen3-235b-a22b-2507", // Cerebras - fast open model
   "moonshotai/kimi-k2-thinking",
   "google/gemini-3-flash-preview",
-  "deepseek/deepseek-v4-flash-0731" // $0.09/$0.18 per M tokens
+  "deepseek/deepseek-v4-flash-0731", // $0.09/$0.18 per M tokens
+  "openai/gpt-6-luna", // $0.10/$0.50 per M tokens - neurosift-chat default
 ];
 
 const PHRASES_TO_CHECK = [
@@ -194,6 +195,12 @@ export async function handleCompletion(
       stream: true,
       tools: body.tools || [],
     };
+
+    // Pass a reasoning effort through to OpenRouter if one is given
+    const effort = body.reasoning?.effort;
+    if (effort === "low" || effort === "medium" || effort === "high") {
+      requestBody.reasoning = { effort };
+    }
 
     // Add provider preference if specified (e.g., "Cerebras" for fast inference)
     if (body.provider) {

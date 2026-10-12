@@ -1,5 +1,7 @@
 import getAppName from "../getAppName";
 import { Chat, ChatMessage } from "../types";
+import { QP_API_BASE_URL } from "../qpApiBaseUrl";
+import { ASSISTANT_DEFAULT_MODELS } from "../assistantModelSettings";
 
 export type ChatAction =
   | {
@@ -37,8 +39,10 @@ export type ChatAction =
 
 const defaultModel = "openai/gpt-4.1-mini";
 
+const appName = getAppName();
+
 export const emptyChat: Chat = {
-  app: getAppName(),
+  app: appName,
   chatId: "",
   messages: [],
   totalUsage: {
@@ -46,7 +50,7 @@ export const emptyChat: Chat = {
     completionTokens: 0,
     estimatedCost: 0,
   },
-  model: defaultModel,
+  model: ASSISTANT_DEFAULT_MODELS[appName] || defaultModel,
 };
 
 export const chatReducer = (state: Chat, action: ChatAction): Chat => {
@@ -98,7 +102,7 @@ export const chatReducer = (state: Chat, action: ChatAction): Chat => {
   }
 };
 
-const API_BASE_URL = "https://qp-worker.neurosift.app";
+const API_BASE_URL = QP_API_BASE_URL;
 
 export const createChatWithContent = async (chat: Chat): Promise<string> => {
   const response = await fetch(`${API_BASE_URL}/api/chats`, {

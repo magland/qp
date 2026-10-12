@@ -15,7 +15,7 @@ compatibility_date = "2024-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "qp-production-db"
-database_id = "64eac6da-750c-4600-951d-cab8a0d16686"
+database_id = "cc64ebe7-b48a-487d-bcf2-a48edcbdab5a"
 
 # R2 Bucket binding
 [[r2_buckets]]
@@ -25,4 +25,4 @@ bucket_name = "qp-chat-storage"
 # KV Namespace binding for rate limiting
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "6fe4bb582f484fb68b1fec987b9ec71e"
+id = "27f80f3e36bc455ebd7cf725a2a5f4f7"

@@ -4,6 +4,8 @@ import { Chat, ChatMessage, CompletionRequest } from "../types";
 import { AVAILABLE_MODELS } from "./availableModels";
 import { getStoredApiKey } from "../utils/apiKeyStorage";
 import { parseCompletionStream } from "./parseCompletionStream";
+import { QP_API_BASE_URL } from "../qpApiBaseUrl";
+import { ASSISTANT_REASONING_EFFORT } from "../assistantModelSettings";
 
 const processCompletion = async (
   chat: Chat,
@@ -22,6 +24,10 @@ const processCompletion = async (
     })),
     app: chat.app, // Pass assistant name for per-assistant API key routing
   };
+  const reasoningEffort = ASSISTANT_REASONING_EFFORT[chat.app];
+  if (reasoningEffort) {
+    request.reasoning = { effort: reasoningEffort };
+  }
 
   // const request: ORRequest = {
   //     model: chat.model,
@@ -42,7 +48,7 @@ const processCompletion = async (
     headers["x-openrouter-key"] = apiKey;
   }
 
-  const response = await fetch("https://qp-worker.neurosift.app/api/completion", {
+  const response = await fetch(`${QP_API_BASE_URL}/api/completion`, {
     method: "POST",
     headers,
     body: JSON.stringify(request),

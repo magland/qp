@@ -83,6 +83,7 @@ export type CompletionRequest = {
   messages: ChatMessage[];
   tools: ORTool[];
   app?: string; // Assistant name for per-assistant API key routing
+  reasoning?: { effort: "low" | "medium" | "high" };
 };
 
 export interface ToolExecutionContext {
