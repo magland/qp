@@ -41,7 +41,7 @@ Add the widget to your HTML page:
 ```javascript
 QPChat.init({
   // API Configuration
-  apiEndpoint: 'https://qp-worker.neurosift.app/api/completion',  // QP API endpoint
+  apiEndpoint: 'https://qp-worker.ben-dichter.workers.dev/api/completion',  // QP API endpoint
   model: 'openai/gpt-4o-mini',      // Model to use
   provider: 'Cerebras',              // Optional: LLM provider
   app: 'my-assistant',               // Optional: App identifier for API key routing

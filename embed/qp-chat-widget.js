@@ -11,7 +11,7 @@
 
   // Default configuration
   const DEFAULT_CONFIG = {
-    apiEndpoint: 'https://qp-worker.neurosift.app/api/completion',
+    apiEndpoint: 'https://qp-worker.ben-dichter.workers.dev/api/completion',
     model: 'openai/gpt-4o-mini',
     provider: null,
     app: null,

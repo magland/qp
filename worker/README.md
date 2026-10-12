@@ -80,7 +80,7 @@ Deploy to Cloudflare:
 npm run deploy
 ```
 
-The worker will be deployed to your Cloudflare account and accessible at the configured route (e.g., `https://qp-worker.neurosift.app`).
+The worker will be deployed to your Cloudflare account and accessible at its workers.dev address (the production worker is `https://qp-worker.ben-dichter.workers.dev`).
 
 ## API Endpoints
 
